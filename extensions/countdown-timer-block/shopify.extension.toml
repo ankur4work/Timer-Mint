@@ -1,0 +1,14 @@
+# Learn more about configuring theme app extensions:
+# https://shopify.dev/docs/apps/online-store/theme-app-extensions
+
+api_version = "2024-10"
+
+[[extensions]]
+uid = "f6475991-6f3e-a11b-b916-f7ddef34683c73508fe7"
+type = "theme"
+name = "Countdown Timer Block"
+handle = "countdown-timer-block"
+
+[extensions.capabilities]
+ajax_api = true
+block_progress = false

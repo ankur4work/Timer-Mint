@@ -1,0 +1,30 @@
+{
+  "name": "Countdown Timer Bar",
+  "settings": {
+    "enabled": {
+      "label": "Enable countdown timer"
+    },
+    "position": {
+      "label": "Position",
+      "options__1": "Top of page",
+      "options__2": "Bottom of page",
+      "options__3": "Floating top",
+      "options__4": "Floating bottom"
+    },
+    "noscript_header": {
+      "content": "No JavaScript Fallback"
+    },
+    "show_noscript_message": {
+      "label": "Show message when JavaScript is disabled"
+    },
+    "noscript_message": {
+      "label": "No JavaScript message"
+    },
+    "fallback_bg_color": {
+      "label": "Fallback background color"
+    },
+    "fallback_text_color": {
+      "label": "Fallback text color"
+    }
+  }
+}

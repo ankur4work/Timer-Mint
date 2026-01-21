@@ -1,0 +1,230 @@
+{% comment %}
+  Countdown Timer Bar - Theme App Block
+  Reads timer config from shop metafield (no API calls needed)
+{% endcomment %}
+
+{% if block.settings.enabled %}
+  {% comment %} Get timer config from metafield {% endcomment %}
+  {% assign config = shop.metafields.countdown.timers_config.value %}
+
+  {% if config.timers and config.timers.size > 0 %}
+    {% assign first_timer = config.timers | first %}
+    {% assign wrapper_position = first_timer.position | default: 'TOP' %}
+
+    {% comment %} Determine inline positioning styles based on position {% endcomment %}
+    {% case wrapper_position %}
+      {% when 'TOP' %}
+        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+      {% when 'BOTTOM' %}
+        {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
+      {% when 'FLOATING_TOP' %}
+        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+      {% when 'FLOATING_BOTTOM' %}
+        {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
+      {% when 'TOP_LEFT' %}
+        {% assign position_style = 'position: fixed; top: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+      {% when 'TOP_RIGHT' %}
+        {% assign position_style = 'position: fixed; top: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+      {% when 'BOTTOM_LEFT' %}
+        {% assign position_style = 'position: fixed; bottom: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+      {% when 'BOTTOM_RIGHT' %}
+        {% assign position_style = 'position: fixed; bottom: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+      {% when 'LEFT_VERTICAL' %}
+        {% assign position_style = 'position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: auto;' %}
+      {% when 'RIGHT_VERTICAL' %}
+        {% assign position_style = 'position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: auto;' %}
+      {% else %}
+        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+    {% endcase %}
+
+    <div
+      id="countdown-timer-bar-{{ block.id }}"
+      class="countdown-timer-bar-wrapper countdown-timer-bar-wrapper--{{ wrapper_position }}"
+      data-block-id="{{ block.id }}"
+      data-position="{{ wrapper_position }}"
+      style="{{ position_style }} z-index: 999999;"
+    >
+      {%- comment -%} Render timer(s) from metafield data {%- endcomment -%}
+      <div class="countdown-timer-bar__container" data-timer-container>
+        {% for timer in config.timers %}
+          {% comment %} Only render ACTIVE timers {% endcomment %}
+          {% if timer.status == 'ACTIVE' %}
+            <div
+              class="countdown-timer-bar countdown-timer-bar--{{ timer.position | default: 'TOP' | downcase }}"
+              data-timer-id="{{ timer.id }}"
+              data-timer-type="{{ timer.type }}"
+              data-end-time="{{ timer.endDate }}"
+              data-timezone="{{ timer.timezone | default: 'UTC' }}"
+              {% if timer.evergreenDuration %}data-evergreen-duration="{{ timer.evergreenDuration }}"{% endif %}
+              {% if timer.evergreenResetDelay %}data-evergreen-reset-delay="{{ timer.evergreenResetDelay }}"{% endif %}
+              {% if timer.dailyStartTime %}data-daily-start-time="{{ timer.dailyStartTime }}"{% endif %}
+              {% if timer.dailyEndTime %}data-daily-end-time="{{ timer.dailyEndTime }}"{% endif %}
+              {% if timer.recurringDays %}data-recurring-days="{{ timer.recurringDays }}"{% endif %}
+              {% if timer.shippingCutoffTime %}data-shipping-cutoff-time="{{ timer.shippingCutoffTime }}"{% endif %}
+              {% if timer.shippingExcludedDays %}data-shipping-excluded-days="{{ timer.shippingExcludedDays }}"{% endif %}
+              {% if timer.shippingHolidays %}data-shipping-holidays="{{ timer.shippingHolidays }}"{% endif %}
+              {% if timer.shippingNextDayText %}data-shipping-next-day-text="{{ timer.shippingNextDayText | escape }}"{% endif %}
+              {% if timer.cartThreshold %}data-cart-threshold="{{ timer.cartThreshold }}"{% endif %}
+              {% if timer.cartTimerDuration %}data-cart-timer-duration="{{ timer.cartTimerDuration }}"{% endif %}
+              {% if timer.expiredText %}data-expired-text="{{ timer.expiredText | escape }}"{% endif %}
+              data-show-days="{{ timer.showDays | default: true }}"
+              data-show-hours="{{ timer.showHours | default: true }}"
+              data-show-minutes="{{ timer.showMinutes | default: true }}"
+              data-show-seconds="{{ timer.showSeconds | default: true }}"
+              data-show-labels="{{ timer.showLabels | default: true }}"
+              data-close-button="{{ timer.closeButton | default: true }}"
+              data-show-on-all-pages="{{ timer.showOnAllPages | default: true }}"
+              {% if timer.targetPages %}data-target-pages="{{ timer.targetPages }}"{% endif %}
+              {% if timer.excludePages %}data-exclude-pages="{{ timer.excludePages }}"{% endif %}
+              style="
+                --timer-bg: {{ timer.backgroundColor | default: '#000000' }};
+                --timer-text: {{ timer.textColor | default: '#FFFFFF' }};
+                --timer-accent: {{ timer.accentColor | default: '#FF0000' }};
+                display: none;
+              "
+            >
+              <div class="countdown-timer-bar__content">
+                {% if timer.preText %}
+                  <span class="countdown-timer-bar__pre-text">{{ timer.preText }}</span>
+                {% endif %}
+
+                <div class="countdown-timer-bar__countdown" data-countdown>
+                  {% if timer.showDays != false %}
+                    <div class="countdown-timer-bar__unit">
+                      <span class="countdown-timer-bar__digit" data-days>00</span>
+                      {% if timer.showLabels != false %}
+                        <span class="countdown-timer-bar__label">Days</span>
+                      {% endif %}
+                    </div>
+                    <span class="countdown-timer-bar__separator">:</span>
+                  {% endif %}
+
+                  {% if timer.showHours != false %}
+                    <div class="countdown-timer-bar__unit">
+                      <span class="countdown-timer-bar__digit" data-hours>00</span>
+                      {% if timer.showLabels != false %}
+                        <span class="countdown-timer-bar__label">Hrs</span>
+                      {% endif %}
+                    </div>
+                    <span class="countdown-timer-bar__separator">:</span>
+                  {% endif %}
+
+                  {% if timer.showMinutes != false %}
+                    <div class="countdown-timer-bar__unit">
+                      <span class="countdown-timer-bar__digit" data-minutes>00</span>
+                      {% if timer.showLabels != false %}
+                        <span class="countdown-timer-bar__label">Min</span>
+                      {% endif %}
+                    </div>
+                    <span class="countdown-timer-bar__separator">:</span>
+                  {% endif %}
+
+                  {% if timer.showSeconds != false %}
+                    <div class="countdown-timer-bar__unit">
+                      <span class="countdown-timer-bar__digit" data-seconds>00</span>
+                      {% if timer.showLabels != false %}
+                        <span class="countdown-timer-bar__label">Sec</span>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                {% if timer.postText %}
+                  <span class="countdown-timer-bar__post-text">{{ timer.postText }}</span>
+                {% endif %}
+
+                {% if timer.linkUrl and timer.linkText %}
+                  <a
+                    href="{{ timer.linkUrl }}"
+                    class="countdown-timer-bar__cta"
+                    data-timer-cta="{{ timer.id }}"
+                  >
+                    {{ timer.linkText }}
+                  </a>
+                {% endif %}
+              </div>
+
+              {% if timer.closeButton != false %}
+                <button
+                  class="countdown-timer-bar__close"
+                  data-timer-close="{{ timer.id }}"
+                  aria-label="Close timer"
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M12.207 4.793a1 1 0 0 1 0 1.414L9.414 9l2.793 2.793a1 1 0 0 1-1.414 1.414L8 10.414l-2.793 2.793a1 1 0 0 1-1.414-1.414L6.586 9 3.793 6.207a1 1 0 0 1 1.414-1.414L8 7.586l2.793-2.793a1 1 0 0 1 1.414 0z"/>
+                  </svg>
+                </button>
+              {% endif %}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    {{ 'timer.css' | asset_url | stylesheet_tag }}
+    <script src="{{ 'timer.js' | asset_url }}" defer></script>
+  {% else %}
+    {% comment %} No active timers - render nothing {% endcomment %}
+  {% endif %}
+
+  {%- comment -%} No-JS fallback {%- endcomment -%}
+  <noscript>
+    {% if block.settings.show_noscript_message %}
+      <style>
+        .countdown-timer-bar-noscript {
+          background-color: {{ block.settings.fallback_bg_color }};
+          color: {{ block.settings.fallback_text_color }};
+          padding: 12px 16px;
+          text-align: center;
+          font-size: 14px;
+        }
+      </style>
+      <div class="countdown-timer-bar-noscript">
+        {{ block.settings.noscript_message }}
+      </div>
+    {% endif %}
+  </noscript>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Countdown Timer Bar",
+  "target": "body",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "enabled",
+      "label": "Enable countdown timer",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "No JavaScript Fallback"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_noscript_message",
+      "label": "Show message when JavaScript is disabled",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "noscript_message",
+      "label": "No JavaScript message",
+      "default": "Enable JavaScript to see our special offers!"
+    },
+    {
+      "type": "color",
+      "id": "fallback_bg_color",
+      "label": "Fallback background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "fallback_text_color",
+      "label": "Fallback text color",
+      "default": "#FFFFFF"
+    }
+  ]
+}
+{% endschema %}

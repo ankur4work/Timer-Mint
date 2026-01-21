@@ -1,0 +1,646 @@
+/* Countdown Timer Bar Styles */
+
+/* CSS Custom Properties */
+:root {
+  --countdown-timer-bg: #000000;
+  --countdown-timer-text: #FFFFFF;
+  --countdown-timer-accent: #FF0000;
+  --countdown-timer-font-size: 14px;
+  --countdown-timer-digit-size: 1.5em;
+  --countdown-timer-padding: 12px 16px;
+  --countdown-timer-gap: 8px;
+  --countdown-timer-z-index: 9999;
+  --countdown-timer-transition: 0.3s ease;
+  --countdown-timer-corner-width: 320px;
+  --countdown-timer-vertical-width: 60px;
+}
+
+/* Wrapper - Base */
+.countdown-timer-bar-wrapper {
+  z-index: 999999 !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Wrapper Position Variants */
+.countdown-timer-bar-wrapper--TOP,
+.countdown-timer-bar-wrapper--top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: var(--countdown-timer-z-index);
+}
+
+.countdown-timer-bar-wrapper--BOTTOM,
+.countdown-timer-bar-wrapper--bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: var(--countdown-timer-z-index);
+}
+
+.countdown-timer-bar-wrapper--FLOATING_TOP,
+.countdown-timer-bar-wrapper--floating-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+.countdown-timer-bar-wrapper--FLOATING_BOTTOM,
+.countdown-timer-bar-wrapper--floating-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+/* Corner Positions */
+.countdown-timer-bar-wrapper--TOP_LEFT {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: var(--countdown-timer-corner-width);
+  max-width: calc(100vw - 40px);
+}
+
+.countdown-timer-bar-wrapper--TOP_RIGHT {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: var(--countdown-timer-corner-width);
+  max-width: calc(100vw - 40px);
+}
+
+.countdown-timer-bar-wrapper--BOTTOM_LEFT {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: var(--countdown-timer-corner-width);
+  max-width: calc(100vw - 40px);
+}
+
+.countdown-timer-bar-wrapper--BOTTOM_RIGHT {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: var(--countdown-timer-corner-width);
+  max-width: calc(100vw - 40px);
+}
+
+/* Vertical Side Positions */
+.countdown-timer-bar-wrapper--LEFT_VERTICAL {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: auto;
+}
+
+.countdown-timer-bar-wrapper--RIGHT_VERTICAL {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: auto;
+}
+
+/* Main Timer Bar */
+.countdown-timer-bar {
+  background-color: var(--timer-bg, var(--countdown-timer-bg));
+  color: var(--timer-text, var(--countdown-timer-text));
+  padding: var(--countdown-timer-padding);
+  font-size: var(--countdown-timer-font-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--countdown-timer-gap);
+  position: relative;
+  transition: transform var(--countdown-timer-transition),
+              opacity var(--countdown-timer-transition);
+}
+
+/* Loading State */
+.countdown-timer-bar--loading {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.countdown-timer-bar__loading-text {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Closing Animation */
+.countdown-timer-bar--closing {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.countdown-timer-bar-wrapper--BOTTOM .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--bottom .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--FLOATING_BOTTOM .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--floating-bottom .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--BOTTOM_LEFT .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--BOTTOM_RIGHT .countdown-timer-bar--closing {
+  transform: translateY(100%);
+}
+
+.countdown-timer-bar-wrapper--LEFT_VERTICAL .countdown-timer-bar--closing {
+  transform: translateX(-100%);
+}
+
+.countdown-timer-bar-wrapper--RIGHT_VERTICAL .countdown-timer-bar--closing {
+  transform: translateX(100%);
+}
+
+.countdown-timer-bar-wrapper--TOP_LEFT .countdown-timer-bar--closing,
+.countdown-timer-bar-wrapper--TOP_RIGHT .countdown-timer-bar--closing {
+  transform: translateY(-100%) scale(0.9);
+}
+
+/* Content Container */
+.countdown-timer-bar__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Pre/Post Text */
+.countdown-timer-bar__pre-text,
+.countdown-timer-bar__post-text {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Countdown Container */
+.countdown-timer-bar__countdown {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Time Unit */
+.countdown-timer-bar__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 36px;
+}
+
+/* Digit */
+.countdown-timer-bar__digit {
+  font-size: var(--countdown-timer-digit-size);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  color: var(--timer-accent, var(--countdown-timer-accent));
+  transition: transform 0.3s ease;
+}
+
+/* Digit Flip Animation */
+.countdown-timer-bar__digit--flip {
+  animation: digitFlip 0.3s ease;
+}
+
+@keyframes digitFlip {
+  0% {
+    transform: translateY(-20%) scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: translateY(10%) scale(1.1);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* Label */
+.countdown-timer-bar__label {
+  font-size: 0.65em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Separator */
+.countdown-timer-bar__separator {
+  font-size: var(--countdown-timer-digit-size);
+  font-weight: 700;
+  color: var(--timer-accent, var(--countdown-timer-accent));
+  opacity: 0.7;
+  margin: 0 2px;
+  align-self: flex-start;
+  line-height: 1.2;
+}
+
+/* CTA Button */
+.countdown-timer-bar__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: var(--timer-accent, var(--countdown-timer-accent));
+  color: var(--timer-bg, var(--countdown-timer-bg));
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9em;
+  border-radius: 4px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  white-space: nowrap;
+}
+
+.countdown-timer-bar__cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.countdown-timer-bar__cta:active {
+  transform: scale(0.98);
+}
+
+/* Close Button */
+.countdown-timer-bar__close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--timer-text, var(--countdown-timer-text));
+  cursor: pointer;
+  padding: 4px;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-timer-bar__close:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.countdown-timer-bar__close:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Expired State */
+.countdown-timer-bar--expired .countdown-timer-bar__expired-text {
+  font-weight: 600;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ========================================
+   POSITION VARIANTS
+   ======================================== */
+
+/* Top/Bottom Full Width Bars */
+.countdown-timer-bar--TOP,
+.countdown-timer-bar--top,
+.countdown-timer-bar--BOTTOM,
+.countdown-timer-bar--bottom {
+  width: 100%;
+}
+
+/* Top/Bottom & Floating Bars - Add shadow */
+.countdown-timer-bar--TOP,
+.countdown-timer-bar--top,
+.countdown-timer-bar--FLOATING_TOP,
+.countdown-timer-bar--floating-top {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.countdown-timer-bar--BOTTOM,
+.countdown-timer-bar--bottom,
+.countdown-timer-bar--FLOATING_BOTTOM,
+.countdown-timer-bar--floating-bottom {
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Corner Positions - Compact & Rounded */
+.countdown-timer-bar--TOP_LEFT,
+.countdown-timer-bar--TOP_RIGHT,
+.countdown-timer-bar--BOTTOM_LEFT,
+.countdown-timer-bar--BOTTOM_RIGHT {
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  padding: 16px 20px;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.countdown-timer-bar--TOP_LEFT .countdown-timer-bar__content,
+.countdown-timer-bar--TOP_RIGHT .countdown-timer-bar__content,
+.countdown-timer-bar--BOTTOM_LEFT .countdown-timer-bar__content,
+.countdown-timer-bar--BOTTOM_RIGHT .countdown-timer-bar__content {
+  flex-direction: column;
+  gap: 10px;
+}
+
+.countdown-timer-bar--TOP_LEFT .countdown-timer-bar__close,
+.countdown-timer-bar--TOP_RIGHT .countdown-timer-bar__close,
+.countdown-timer-bar--BOTTOM_LEFT .countdown-timer-bar__close,
+.countdown-timer-bar--BOTTOM_RIGHT .countdown-timer-bar__close {
+  top: 8px;
+  right: 8px;
+  transform: none;
+}
+
+.countdown-timer-bar--TOP_LEFT .countdown-timer-bar__close:hover,
+.countdown-timer-bar--TOP_RIGHT .countdown-timer-bar__close:hover,
+.countdown-timer-bar--BOTTOM_LEFT .countdown-timer-bar__close:hover,
+.countdown-timer-bar--BOTTOM_RIGHT .countdown-timer-bar__close:hover {
+  transform: scale(1.1);
+}
+
+/* Vertical Side Bars */
+.countdown-timer-bar--LEFT_VERTICAL,
+.countdown-timer-bar--RIGHT_VERTICAL {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 20px 12px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 2px 0 15px rgba(0, 0, 0, 0.2);
+  min-height: 200px;
+  max-height: 80vh;
+}
+
+.countdown-timer-bar--RIGHT_VERTICAL {
+  writing-mode: vertical-lr;
+  border-radius: 8px 0 0 8px;
+  box-shadow: -2px 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__content,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__content {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__countdown,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__countdown {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__unit,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__unit {
+  writing-mode: horizontal-tb;
+  min-width: auto;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__separator,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__separator {
+  writing-mode: horizontal-tb;
+  margin: 4px 0;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__pre-text,
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__post-text,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__pre-text,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__post-text {
+  writing-mode: horizontal-tb;
+  white-space: normal;
+  text-align: center;
+  font-size: 0.85em;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__cta,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__cta {
+  writing-mode: horizontal-tb;
+  padding: 6px 12px;
+  font-size: 0.8em;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__close,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__close {
+  position: absolute;
+  top: 8px;
+  right: 50%;
+  transform: translateX(50%);
+  writing-mode: horizontal-tb;
+}
+
+.countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__close:hover,
+.countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__close:hover {
+  transform: translateX(50%) scale(1.1);
+}
+
+/* ========================================
+   MOBILE RESPONSIVE
+   ======================================== */
+
+@media screen and (max-width: 768px) {
+  :root {
+    --countdown-timer-font-size: 12px;
+    --countdown-timer-digit-size: 1.3em;
+    --countdown-timer-padding: 10px 12px;
+    --countdown-timer-gap: 6px;
+    --countdown-timer-corner-width: 280px;
+  }
+
+  .countdown-timer-bar__content {
+    gap: 10px;
+  }
+
+  .countdown-timer-bar__unit {
+    min-width: 28px;
+  }
+
+  .countdown-timer-bar__cta {
+    padding: 6px 12px;
+    font-size: 0.85em;
+  }
+
+  .countdown-timer-bar__close {
+    right: 8px;
+  }
+
+  .countdown-timer-bar__pre-text,
+  .countdown-timer-bar__post-text {
+    display: none;
+  }
+
+  /* Corner positions on mobile */
+  .countdown-timer-bar-wrapper--TOP_LEFT,
+  .countdown-timer-bar-wrapper--TOP_RIGHT,
+  .countdown-timer-bar-wrapper--BOTTOM_LEFT,
+  .countdown-timer-bar-wrapper--BOTTOM_RIGHT {
+    left: 10px;
+    right: 10px;
+    width: auto;
+    max-width: none;
+  }
+
+  .countdown-timer-bar-wrapper--TOP_RIGHT {
+    left: 10px;
+  }
+
+  .countdown-timer-bar-wrapper--BOTTOM_RIGHT {
+    left: 10px;
+  }
+
+  /* Vertical positions on mobile - convert to horizontal bottom bar */
+  .countdown-timer-bar-wrapper--LEFT_VERTICAL,
+  .countdown-timer-bar-wrapper--RIGHT_VERTICAL {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    width: 100%;
+  }
+
+  .countdown-timer-bar--LEFT_VERTICAL,
+  .countdown-timer-bar--RIGHT_VERTICAL {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    border-radius: 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
+    min-height: auto;
+    max-height: none;
+    padding: var(--countdown-timer-padding);
+  }
+
+  .countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__content,
+  .countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__content {
+    flex-direction: row;
+  }
+
+  .countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__countdown,
+  .countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__countdown {
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .countdown-timer-bar--LEFT_VERTICAL .countdown-timer-bar__close,
+  .countdown-timer-bar--RIGHT_VERTICAL .countdown-timer-bar__close {
+    top: 50%;
+    right: 8px;
+    transform: translateY(-50%);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  :root {
+    --countdown-timer-font-size: 11px;
+    --countdown-timer-digit-size: 1.2em;
+    --countdown-timer-padding: 8px 10px;
+    --countdown-timer-corner-width: 100%;
+  }
+
+  .countdown-timer-bar__content {
+    gap: 8px;
+  }
+
+  .countdown-timer-bar__countdown {
+    gap: 2px;
+  }
+
+  .countdown-timer-bar__unit {
+    min-width: 24px;
+  }
+
+  .countdown-timer-bar__label {
+    font-size: 0.6em;
+  }
+
+  .countdown-timer-bar__separator {
+    margin: 0 1px;
+  }
+
+  .countdown-timer-bar__close {
+    right: 6px;
+    padding: 2px;
+  }
+
+  .countdown-timer-bar__close svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Corner positions on small mobile */
+  .countdown-timer-bar-wrapper--TOP_LEFT,
+  .countdown-timer-bar-wrapper--BOTTOM_LEFT {
+    left: 5px;
+    right: 5px;
+  }
+
+  .countdown-timer-bar-wrapper--TOP_RIGHT,
+  .countdown-timer-bar-wrapper--BOTTOM_RIGHT {
+    left: 5px;
+    right: 5px;
+  }
+
+  .countdown-timer-bar--TOP_LEFT,
+  .countdown-timer-bar--TOP_RIGHT,
+  .countdown-timer-bar--BOTTOM_LEFT,
+  .countdown-timer-bar--BOTTOM_RIGHT {
+    padding: 12px 16px;
+    border-radius: 6px;
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .countdown-timer-bar {
+    border: 2px solid currentColor;
+  }
+
+  .countdown-timer-bar__cta {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .countdown-timer-bar,
+  .countdown-timer-bar__digit,
+  .countdown-timer-bar__cta,
+  .countdown-timer-bar__close {
+    transition: none;
+    animation: none;
+  }
+
+  .countdown-timer-bar__digit--flip {
+    animation: none;
+  }
+
+  .countdown-timer-bar--closing {
+    transition: opacity 0.1s ease;
+    transform: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .countdown-timer-bar-wrapper {
+    display: none !important;
+  }
+}

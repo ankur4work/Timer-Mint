@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// Note: Enums are defined as TypeScript types in app/types.ts
+// TimerType: "FIXED" | "EVERGREEN" | "RECURRING" | "CART" | "SHIPPING"
+// Status: "ACTIVE" | "INACTIVE" | "SCHEDULED"
+// Position: "TOP" | "BOTTOM"
+
+// Session model for Shopify OAuth (from template)
+model Session {
+  id              String    @id
+  shop            String
+  state           String
+  isOnline        Boolean   @default(false)
+  scope           String?
+  expires         DateTime?
+  accessToken     String
+  userId          BigInt?
+  firstName       String?
+  lastName        String?
+  email           String?
+  accountOwner    Boolean   @default(false)
+  locale          String?
+  collaborator    Boolean?  @default(false)
+  emailVerified   Boolean?  @default(false)
+}
+
+// Timer model - represents individual countdown timers
+model Timer {
+  id              String    @id @default(cuid())
+  shop            String    // Shop domain
+  name            String    // Timer name for identification
+  type            String    @default("FIXED") // TimerType: FIXED, EVERGREEN, RECURRING, CART, SHIPPING
+  status          String    @default("INACTIVE")  // Status: ACTIVE, INACTIVE, SCHEDULED
+
+  // Timing configuration
+  startDate       DateTime?
+  endDate         DateTime
+  timezone        String    @default("UTC")
+
+  // Evergreen timer settings
+  evergreenDuration Int?    // Duration in minutes for evergreen timers
+  evergreenResetDelay Int?  // Delay before reset in minutes
+
+  // Daily/Recurring timer settings
+  dailyStartTime  String?   // HH:MM format
+  dailyEndTime    String?   // HH:MM format
+  recurringDays   String?   // JSON array of days (0=Sunday, 6=Saturday)
+
+  // Shipping timer settings
+  shippingCutoffTime   String?   // HH:MM format for same-day shipping cutoff
+  shippingExcludedDays String?   // JSON array of excluded days (0=Sunday, 6=Saturday)
+  shippingHolidays     String?   // JSON array of holiday dates (YYYY-MM-DD format)
+  shippingNextDayText  String?   // Text to show when past cutoff
+
+  // Cart timer settings
+  cartThreshold   Float?    // Minimum cart value threshold
+  cartTimerDuration Int?    // Duration in minutes for cart timers
+
+  // Expired state
+  expiredText     String?   // Text to display when timer expires
+
+  // Display settings
+  position        String    @default("TOP") // Position: TOP, BOTTOM
+  backgroundColor String    @default("#000000")
+  textColor       String    @default("#FFFFFF")
+  accentColor     String    @default("#FF0000")
+
+  // Content
+  preText         String?   // Text before the timer
+  postText        String?   // Text after the timer
+  linkUrl         String?   // Optional CTA link
+  linkText        String?   // CTA button text
+
+  // Targeting
+  showOnAllPages  Boolean   @default(true)
+  targetPages     String?   // JSON array of page URLs/types
+  excludePages    String?   // JSON array of excluded pages
+
+  // Advanced settings
+  showDays        Boolean   @default(true)
+  showHours       Boolean   @default(true)
+  showMinutes     Boolean   @default(true)
+  showSeconds     Boolean   @default(true)
+  showLabels      Boolean   @default(true)
+  closeButton     Boolean   @default(true)
+  stickyOnScroll  Boolean   @default(true)
+
+  // Animation
+  animation       String?   // Animation type
+
+  // Priority for display order
+  priority        Int       @default(5) // 1-10, higher = more important
+
+  // Analytics
+  impressions     Int       @default(0)
+  clicks          Int       @default(0)
+
+  // Metadata
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relation to settings
+  settings        Settings? @relation(fields: [settingsId], references: [id])
+  settingsId      String?
+
+  @@index([shop])
+  @@index([status])
+}
+
+// Settings model - global app settings per shop
+model Settings {
+  id                String    @id @default(cuid())
+  shop              String    @unique // Shop domain
+
+  // Default styling
+  defaultPosition   String    @default("TOP") // Position: TOP, BOTTOM
+  defaultBgColor    String    @default("#000000")
+  defaultTextColor  String    @default("#FFFFFF")
+  defaultAccentColor String   @default("#FF0000")
+
+  // Font settings
+  fontFamily        String    @default("inherit")
+  fontSize          String    @default("14px")
+
+  // Default content
+  defaultPreText    String?
+  defaultPostText   String?
+
+  // Behavior settings
+  cookieDuration    Int       @default(24) // Hours to remember closed state
+  respectDoNotTrack Boolean   @default(false)
+
+  // Feature flags
+  enableAnalytics   Boolean   @default(true)
+  enableABTesting   Boolean   @default(false)
+
+  // Custom CSS
+  customCSS         String?
+
+  // Metadata
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  // Relations
+  timers            Timer[]
+
+  @@index([shop])
+}
