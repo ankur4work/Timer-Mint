@@ -311,12 +311,12 @@ export default function Dashboard() {
             />
             <StatCard
               title="Total Impressions"
-              value={stats.todayImpressions.toLocaleString()}
+              value={stats.todayImpressions.toLocaleString("en-US")}
               icon={ViewIcon}
             />
             <StatCard
               title="Total Clicks"
-              value={stats.todayClicks.toLocaleString()}
+              value={stats.todayClicks.toLocaleString("en-US")}
               icon={ButtonIcon}
             />
           </InlineGrid>

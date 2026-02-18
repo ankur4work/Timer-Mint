@@ -112,10 +112,21 @@ export function DateTimePicker({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(
     parsed.date || undefined
   );
-  const [{ month, year }, setDate] = useState({
-    month: parsed.date ? parsed.date.getMonth() : new Date().getMonth(),
-    year: parsed.date ? parsed.date.getFullYear() : new Date().getFullYear(),
+  const [{ month, year }, setDate] = useState(() => {
+    if (parsed.date) {
+      return { month: parsed.date.getMonth(), year: parsed.date.getFullYear() };
+    }
+    // Avoid calling new Date() during SSR to prevent hydration mismatch
+    return { month: 0, year: new Date().getFullYear() };
   });
+
+  // Set current month/year on client after hydration if no date is selected
+  useEffect(() => {
+    if (!parsed.date) {
+      const now = new Date();
+      setDate({ month: now.getMonth(), year: now.getFullYear() });
+    }
+  }, [parsed.date]);
   const [hour, setHour] = useState(parsed.hour);
   const [minute, setMinute] = useState(parsed.minute);
 

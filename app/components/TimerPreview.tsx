@@ -91,22 +91,19 @@ export function TimerPreview({
   showDeviceToggle = true,
 }: TimerPreviewProps) {
   const [viewMode, setViewMode] = useState<"desktop" | "mobile">("desktop");
-  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(() => {
-    if (data.type === "EVERGREEN") {
-      return calculateEvergreenTime(data.evergreenDuration);
-    }
-    return calculateTimeRemaining(data.endDate);
-  });
+  const [timeRemaining, setTimeRemaining] = useState<TimeRemaining>(
+    { days: 0, hours: 0, minutes: 0, seconds: 0, expired: false }
+  );
   const [isVisible, setIsVisible] = useState(true);
 
-  // Update countdown every second
+  // Update countdown every second (client-only to avoid hydration mismatch)
   useEffect(() => {
     if (data.type === "EVERGREEN") {
-      // For evergreen, show static preview
       setTimeRemaining(calculateEvergreenTime(data.evergreenDuration));
       return;
     }
 
+    setTimeRemaining(calculateTimeRemaining(data.endDate));
     const interval = setInterval(() => {
       setTimeRemaining(calculateTimeRemaining(data.endDate));
     }, 1000);

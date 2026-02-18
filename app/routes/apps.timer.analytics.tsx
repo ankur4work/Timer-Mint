@@ -21,22 +21,12 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ error: "Method not allowed" }, { status: 405, headers: getCorsHeaders() });
   }
 
-  // Get shop from Shopify proxy headers
-  const shop = request.headers.get("X-Shopify-Shop-Domain");
-
-  if (!shop) {
-    return json(
-      { error: "Unauthorized" },
-      { status: 401, headers: getCorsHeaders() }
-    );
-  }
-
   try {
-    // Parse beacon data
+    // Parse beacon data first (request.text() can only be called once)
     const body = await request.text();
     const data = JSON.parse(body);
 
-    const { event, timerId, timestamp, url } = data;
+    const { event, timerId } = data;
 
     if (!event || !timerId) {
       return json(
@@ -53,18 +43,33 @@ export async function action({ request }: ActionFunctionArgs) {
       );
     }
 
-    // Update timer analytics in database
-    // For now, we'll increment counters on the timer record
-    // In a production app, you might want a separate analytics table
+    // Get shop from Shopify proxy header (preferred) OR look up from DB by timer ID
+    let shop = request.headers.get("X-Shopify-Shop-Domain");
+
+    if (!shop) {
+      // Fallback: resolve shop from the timer record itself
+      const timer = await prisma.timer.findUnique({
+        where: { id: timerId },
+        select: { shop: true },
+      });
+
+      if (!timer) {
+        return json(
+          { error: "Timer not found" },
+          { status: 404, headers: getCorsHeaders() }
+        );
+      }
+
+      shop = timer.shop;
+    }
+
+    // Increment the appropriate counter
     const updateData = event === "impression"
       ? { impressions: { increment: 1 } }
       : { clicks: { increment: 1 } };
 
     await prisma.timer.update({
-      where: {
-        id: timerId,
-        shop: shop, // Ensure timer belongs to this shop
-      },
+      where: { id: timerId, shop },
       data: updateData,
     });
 
@@ -73,7 +78,7 @@ export async function action({ request }: ActionFunctionArgs) {
       { headers: getCorsHeaders() }
     );
   } catch (error) {
-    // Don't log errors for beacon requests - they're expected to fail sometimes
+    console.error("[Analytics] Failed to record event:", error);
     return json(
       { error: "Failed to record analytics" },
       { status: 500, headers: getCorsHeaders() }

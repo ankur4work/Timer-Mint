@@ -9,13 +9,14 @@ export function formatTimerDate(date: Date | string | null): string {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "UTC",
   });
 }
 
 export function formatDateForInput(date: string | Date | null): string {
   if (!date) return "";
   const d = typeof date === "string" ? new Date(date) : date;
-  // Format: YYYY-MM-DDTHH:mm
+  // Use UTC methods to avoid timezone differences between server and client (hydration mismatch)
   const pad = (n: number) => n.toString().padStart(2, "0");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }

@@ -872,6 +872,38 @@
   // ANALYTICS
   // ============================================================================
 
+  /**
+   * Send analytics event to the server via app proxy
+   */
+  function sendAnalytics(event, timerId) {
+    const analyticsUrl = '/apps/timer/analytics';
+    const payload = JSON.stringify({
+      event: event,
+      timerId: timerId,
+      timestamp: new Date().toISOString(),
+      url: window.location.href,
+    });
+
+    try {
+      if (navigator.sendBeacon) {
+        const blob = new Blob([payload], { type: 'application/json' });
+        navigator.sendBeacon(analyticsUrl, blob);
+      } else {
+        fetch(analyticsUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload,
+          keepalive: true,
+        }).catch(function() {});
+      }
+    } catch (e) {
+      // Analytics failure should never break the timer
+    }
+  }
+
+  /**
+   * Track an impression (once per timer per day per device)
+   */
   function trackImpression(timerId) {
     const data = safeGetStorage(STORAGE_KEYS.IMPRESSIONS, {});
     const sessionKey = `${timerId}_${new Date().toDateString()}`;
@@ -879,6 +911,7 @@
     if (!data[sessionKey]) {
       data[sessionKey] = true;
       safeSetStorage(STORAGE_KEYS.IMPRESSIONS, data);
+      sendAnalytics('impression', timerId);
     }
   }
 
@@ -918,9 +951,8 @@
   }
 
   function handleCtaClick(event) {
-    // Optional: track CTA clicks
     const timerId = event.currentTarget.dataset.timerCta;
-    console.log('Timer CTA clicked:', timerId);
+    sendAnalytics('click', timerId);
   }
 
   // ============================================================================
