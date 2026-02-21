@@ -158,3 +158,15 @@ model Settings {
 
   @@index([shop])
 }
+
+model ShopSubscription {
+  id             String   @id @default(cuid())
+  shop           String   @unique
+  plan           String   @default("FREE")
+  subscriptionId String?
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([shop])
+}

@@ -28,6 +28,8 @@ import {
 import { authenticate } from "~/shopify.server";
 import prisma from "~/db.server";
 import { formatTimerDate } from "~/utils/format";
+import { getShopPlan } from "~/lib/billing.server";
+import { PLANS } from "~/lib/plans";
 
 interface DashboardStats {
   totalTimers: number;
@@ -100,7 +102,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     hasActiveTimer: activeTimers > 0,
   };
 
-  return json({ stats, shop });
+  const planName = await getShopPlan(shop);
+
+  return json({ stats, shop, planName });
 };
 
 function StatCard({
@@ -240,7 +244,10 @@ function SetupChecklist({
 }
 
 export default function Dashboard() {
-  const { stats } = useLoaderData<typeof loader>();
+  const { stats, planName } = useLoaderData<typeof loader>();
+
+  const planConfig = PLANS[planName as keyof typeof PLANS];
+  const isFreePlan = planName === "FREE";
 
   // Show welcome state for new users
   if (stats.totalTimers === 0) {
@@ -296,6 +303,27 @@ export default function Dashboard() {
       }}
     >
       <Layout>
+        {/* Plan badge + upgrade CTA */}
+        <Layout.Section>
+          <InlineStack align="space-between" blockAlign="center">
+            <InlineStack gap="200" blockAlign="center">
+              <Badge tone={isFreePlan ? "info" : "success"}>
+                {`${planName.charAt(0)}${planName.slice(1).toLowerCase()} Plan`}
+              </Badge>
+              <Text as="span" variant="bodySm" tone="subdued">
+                {planConfig.maxActiveTimers === Number.MAX_SAFE_INTEGER
+                  ? "Unlimited active timers"
+                  : `Up to ${planConfig.maxActiveTimers} active timer${planConfig.maxActiveTimers !== 1 ? "s" : ""}`}
+              </Text>
+            </InlineStack>
+            {isFreePlan && (
+              <Button url="/app/billing" variant="secondary" size="slim">
+                Upgrade Plan
+              </Button>
+            )}
+          </InlineStack>
+        </Layout.Section>
+
         {/* Stats Cards */}
         <Layout.Section>
           <InlineGrid columns={{ xs: 1, sm: 2, md: 4 }} gap="400">

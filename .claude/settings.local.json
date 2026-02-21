@@ -4,7 +4,10 @@
       "Bash(npm install:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(cd \"/c/Users/ritik/imp files/work/Countdown/countdown\" && npx prisma migrate dev --name add_shop_subscription 2>&1)",
+      "Bash(cd \"/c/Users/ritik/imp files/work/Countdown/countdown\" && npx tsc --noEmit 2>&1)",
+      "Bash(cd \"/c/Users/ritik/imp files/work/Countdown/countdown\" && npx vite build 2>&1)"
     ]
   }
 }

@@ -17,6 +17,7 @@ import {
   Button,
   BlockStack,
   Box,
+  Banner,
 } from "@shopify/polaris";
 import { useState, useCallback, useEffect } from "react";
 import { authenticate } from "~/shopify.server";
@@ -27,6 +28,9 @@ import {
 } from "~/utils/timer.server";
 import { syncTimersToMetafield } from "~/utils/sync.server";
 import { formatTimerDate } from "~/utils/format";
+import { getShopPlan } from "~/lib/billing.server";
+import { PLANS } from "~/lib/plans";
+import prisma from "~/db.server";
 
 // Serialized timer type (dates are strings after JSON serialization)
 interface SerializedTimer {
@@ -75,9 +79,22 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const type = url.searchParams.get("type") || undefined;
   const search = url.searchParams.get("search") || undefined;
 
-  const timers = await getTimers(shop, { status, type, search });
+  const [timers, planName, activeTimerCount] = await Promise.all([
+    getTimers(shop, { status, type, search }),
+    getShopPlan(shop),
+    prisma.timer.count({ where: { shop, status: "ACTIVE" } }),
+  ]);
 
-  return json({ timers, shop });
+  const planConfig = PLANS[planName];
+
+  return json({
+    timers,
+    shop,
+    planName,
+    activeTimerCount,
+    // MAX_SAFE_INTEGER means "unlimited" — return null for cleaner client handling
+    maxTimers: planConfig.maxActiveTimers === Number.MAX_SAFE_INTEGER ? null : planConfig.maxActiveTimers,
+  });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -96,11 +113,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         await syncTimersToMetafield(admin, shop);
         return json({ success: true, message: `${ids.length} timer(s) deleted` });
 
-      case "activate":
+      case "activate": {
+        // Enforce plan limits before activating
+        const [planName, currentActive] = await Promise.all([
+          getShopPlan(shop),
+          prisma.timer.count({ where: { shop, status: "ACTIVE" } }),
+        ]);
+        const planConfig = PLANS[planName];
+        if (planConfig.maxActiveTimers !== Number.MAX_SAFE_INTEGER && currentActive + ids.length > planConfig.maxActiveTimers) {
+          return json(
+            {
+              success: false,
+              message:
+                planName === "FREE"
+                  ? `You've reached your ${planConfig.maxActiveTimers} active timer limit on the Free plan. Upgrade to Standard for up to 5 active timers.`
+                  : `You've reached your ${planConfig.maxActiveTimers} active timer limit. Upgrade to Premium for unlimited timers.`,
+            },
+            { status: 403 }
+          );
+        }
         await updateTimersStatus(ids, shop, "ACTIVE");
         // Sync timers to metafield for storefront access
         await syncTimersToMetafield(admin, shop);
         return json({ success: true, message: `${ids.length} timer(s) activated` });
+      }
 
       case "pause":
         await updateTimersStatus(ids, shop, "INACTIVE");
@@ -146,7 +182,7 @@ function getTypeBadge(type: string) {
 }
 
 export default function TimersIndex() {
-  const { timers } = useLoaderData<typeof loader>();
+  const { timers, planName, activeTimerCount, maxTimers } = useLoaderData<typeof loader>();
   const [searchParams, setSearchParams] = useSearchParams();
   const submit = useSubmit();
   const navigation = useNavigation();
@@ -401,6 +437,9 @@ export default function TimersIndex() {
     );
   }
 
+  // maxTimers is null for unlimited (Premium) plans
+  const atLimit = maxTimers !== null && activeTimerCount >= maxTimers;
+
   return (
     <Page
       title="Timers"
@@ -410,6 +449,19 @@ export default function TimersIndex() {
       }}
     >
       <Layout>
+        {atLimit && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title={`You've reached your active timer limit`}
+              action={{ content: "Upgrade Plan", url: "/app/billing" }}
+            >
+              {planName === "FREE"
+                ? `You're on the Free plan (${maxTimers} active timer limit). Upgrade to Standard to get up to 5 active timers.`
+                : `You've used all ${maxTimers} active timers on the Standard plan. Upgrade to Premium for unlimited timers.`}
+            </Banner>
+          </Layout.Section>
+        )}
         <Layout.Section>
           <Card padding="0">
             <IndexFilters

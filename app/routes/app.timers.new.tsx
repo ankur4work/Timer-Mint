@@ -1,5 +1,5 @@
 import { json, redirect, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useActionData, useNavigation, Form, useSubmit } from "@remix-run/react";
+import { useActionData, useNavigation, useLoaderData, Form, useSubmit } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -11,6 +11,9 @@ import { useState, useCallback } from "react";
 import { authenticate } from "~/shopify.server";
 import { createTimer, validateTimerData } from "~/utils/timer.server";
 import { syncTimersToMetafield } from "~/utils/sync.server";
+import { getShopPlan } from "~/lib/billing.server";
+import { PLANS } from "~/lib/plans";
+import prisma from "~/db.server";
 import { TimerForm, getDefaultTimerFormData, type TimerFormData } from "~/components/TimerForm";
 import { TimerPreview, type TimerPreviewData } from "~/components/TimerPreview";
 
@@ -21,8 +24,22 @@ interface ActionData {
 }
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-  return json({});
+  const { session } = await authenticate.admin(request);
+  const shop = session.shop;
+
+  const [planName, activeTimerCount] = await Promise.all([
+    getShopPlan(shop),
+    prisma.timer.count({ where: { shop, status: "ACTIVE" } }),
+  ]);
+
+  const planConfig = PLANS[planName];
+
+  return json({
+    planName,
+    activeTimerCount,
+    // MAX_SAFE_INTEGER means "unlimited" — return null for cleaner client handling
+    maxTimers: planConfig.maxActiveTimers === Number.MAX_SAFE_INTEGER ? null : planConfig.maxActiveTimers,
+  });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -74,6 +91,28 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       );
     }
 
+    // Enforce plan limits when activating a timer
+    if (data.status === "ACTIVE") {
+      const [planName, currentActiveCount] = await Promise.all([
+        getShopPlan(shop),
+        prisma.timer.count({ where: { shop, status: "ACTIVE" } }),
+      ]);
+      const planConfig = PLANS[planName];
+      if (planConfig.maxActiveTimers !== Number.MAX_SAFE_INTEGER && currentActiveCount >= planConfig.maxActiveTimers) {
+        return json<ActionData>(
+          {
+            success: false,
+            errors: {},
+            message:
+              planName === "FREE"
+                ? `You've reached your ${planConfig.maxActiveTimers} active timer limit on the Free plan. Upgrade to Standard to get up to 5 active timers.`
+                : `You've reached your ${planConfig.maxActiveTimers} active timer limit. Upgrade to Premium for unlimited timers.`,
+          },
+          { status: 403 }
+        );
+      }
+    }
+
     await createTimer(shop, validation.data);
 
     // Sync timers to metafield for storefront access
@@ -94,10 +133,14 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function NewTimer() {
+  const { planName, activeTimerCount, maxTimers } = useLoaderData<typeof loader>();
   const actionData = useActionData<ActionData>();
   const navigation = useNavigation();
   const submit = useSubmit();
   const isSubmitting = navigation.state === "submitting";
+
+  // maxTimers is null for unlimited (Premium) plans
+  const atLimit = maxTimers !== null && activeTimerCount >= maxTimers;
 
   const [formData, setFormData] = useState<TimerFormData>(getDefaultTimerFormData());
 
@@ -144,6 +187,20 @@ export default function NewTimer() {
       backAction={{ content: "Timers", url: "/app/timers" }}
     >
       <Layout>
+        {atLimit && (
+          <Layout.Section>
+            <Banner
+              tone="warning"
+              title={`You've reached your ${maxTimers ?? "unlimited"} active timer limit`}
+              action={{ content: "Upgrade Plan", url: "/app/billing" }}
+            >
+              {planName === "FREE"
+                ? "Upgrade to Standard to get up to 5 active timers."
+                : "Upgrade to Premium for unlimited active timers."}
+            </Banner>
+          </Layout.Section>
+        )}
+
         {actionData?.message && !actionData?.success && (
           <Layout.Section>
             <Banner tone="critical">{actionData.message}</Banner>
