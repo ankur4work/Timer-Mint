@@ -250,8 +250,8 @@ export default function BillingPage() {
 
   return (
     <Page
-      title="Billing & Plans"
-      subtitle="Choose the plan that fits your store's needs"
+      title="Plans & billing"
+      subtitle="Choose the Timer Mint plan that matches your growth stage"
     >
       <Layout>
         {success && (

@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "a8cfc7af433873fa90bf5cf030975fdf"
-name = "CountDown"
-application_url = "https://shopify.dev/apps/default-app-home"
+client_id = "3a5414d98bec5d9f4030e3093980f493"
+name = "Timer Mint"
+application_url = "http://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io"
 embedded = true
 
 [build]
@@ -18,9 +18,9 @@ api_version = "2026-04"
 scopes = "read_themes,write_themes"
 
 [auth]
-redirect_urls = [ "https://shopify.dev/apps/default-app-home/api/auth" ]
+redirect_urls = [ "http://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io/api/auth" ]
 
 [app_proxy]
-url = "https://shopify.dev/apps/default-app-home/apps/timer"
-subpath = "timer"
+url = "http://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io/apps/timer-mint"
+subpath = "timer-mint"
 prefix = "apps"

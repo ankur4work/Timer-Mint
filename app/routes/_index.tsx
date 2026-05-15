@@ -14,8 +14,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 export default function App() {
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Countdown Timer Bar</h1>
-      <p>Please install this app on your Shopify store to continue.</p>
+      <h1>Timer Mint</h1>
+      <p>Install Timer Mint on your Shopify store to start launching polished urgency bars.</p>
     </div>
   );
 }

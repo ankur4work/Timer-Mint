@@ -876,7 +876,7 @@
    * Send analytics event to the server via app proxy
    */
   function sendAnalytics(event, timerId) {
-    const analyticsUrl = '/apps/timer/analytics';
+    const analyticsUrl = '/apps/timer-mint/analytics';
     const payload = JSON.stringify({
       event: event,
       timerId: timerId,
@@ -1040,7 +1040,7 @@
   async function initTimers() {
     const wrapper = document.querySelector('.countdown-timer-bar-wrapper');
     if (!wrapper) {
-      console.log('Countdown Timer: No timer wrapper found');
+      console.log('Timer Mint: No timer wrapper found');
       return;
     }
 

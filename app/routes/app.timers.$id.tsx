@@ -172,7 +172,7 @@ function timerToFormData(timer: any): TimerFormData {
     dailyEndTime: timer.dailyEndTime || "",
     preText: timer.preText || "",
     postText: timer.postText || "",
-    expiredText: "Offer expired!",
+    expiredText: "Mint closed!",
     ctaText: timer.linkText || "",
     ctaUrl: timer.linkUrl || "",
     position: timer.position || "TOP",

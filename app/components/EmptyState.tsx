@@ -62,19 +62,19 @@ export function EmptyStateCard({
 export function NoTimersEmptyState() {
   return (
     <EmptyStateCard
-      heading="Create your first countdown timer"
+      heading="Create your first Timer Mint campaign"
       action={{
-        content: "Create timer",
+        content: "Create campaign",
         url: "/app/timers/new",
       }}
       image={EMPTY_STATE_IMAGES.timers}
     >
       <BlockStack gap="200">
         <Text as="p" variant="bodyMd">
-          Add countdown timers to your store to create urgency and boost conversions.
+          Add polished urgency campaigns to your store to boost conversions.
         </Text>
         <Text as="p" variant="bodyMd">
-          Choose from multiple timer types: fixed countdowns, evergreen timers, recurring schedules, and more.
+          Choose from fixed countdowns, evergreen campaigns, recurring schedules, and more.
         </Text>
       </BlockStack>
     </EmptyStateCard>

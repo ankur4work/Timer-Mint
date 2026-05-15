@@ -3,7 +3,7 @@ import prisma from "~/db.server";
 
 /**
  * App Proxy endpoint for tracking timer analytics
- * URL: /apps/timer/analytics (via app proxy)
+ * URL: /apps/timer-mint/analytics (via app proxy)
  *
  * Accepts POST requests with beacon data for impressions and clicks
  */

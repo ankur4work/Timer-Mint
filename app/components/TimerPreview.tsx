@@ -124,7 +124,7 @@ export function TimerPreview({
     accentColor = "#FF0000",
     preText = "",
     postText = "",
-    expiredText = "Offer expired!",
+    expiredText = "Mint closed!",
     ctaText = "",
     ctaUrl = "",
     showDays = true,

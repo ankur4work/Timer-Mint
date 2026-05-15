@@ -171,7 +171,7 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <Page title="Settings" backAction={{ content: "Home", url: "/app" }}>
+    <Page title="Brand Studio" backAction={{ content: "Home", url: "/app" }}>
       <Form method="post">
         <Layout>
           {showToast && actionData?.success && (
@@ -198,7 +198,7 @@ export default function SettingsPage() {
                   Default Styling
                 </Text>
                 <Text as="p" variant="bodyMd" tone="subdued">
-                  Set default colors and position for new timers. These can be overridden per timer.
+                  Set the default Timer Mint palette and placement for new campaigns. Each campaign can still be customized individually.
                 </Text>
 
                 <FormLayout>
@@ -213,7 +213,6 @@ export default function SettingsPage() {
                   <FormLayout.Group>
                     <TextField
                       label="Background Color"
-                      type="color"
                       value={formData.defaultBgColor}
                       onChange={handleChange("defaultBgColor")}
                       name="defaultBgColor"
@@ -221,7 +220,6 @@ export default function SettingsPage() {
                     />
                     <TextField
                       label="Text Color"
-                      type="color"
                       value={formData.defaultTextColor}
                       onChange={handleChange("defaultTextColor")}
                       name="defaultTextColor"
@@ -229,7 +227,6 @@ export default function SettingsPage() {
                     />
                     <TextField
                       label="Accent Color"
-                      type="color"
                       value={formData.defaultAccentColor}
                       onChange={handleChange("defaultAccentColor")}
                       name="defaultAccentColor"
@@ -279,7 +276,7 @@ export default function SettingsPage() {
                   Default Content
                 </Text>
                 <Text as="p" variant="bodyMd" tone="subdued">
-                  Set default text that appears before and after the countdown.
+                  Set the default copy that frames each Timer Mint countdown.
                 </Text>
 
                 <FormLayout>

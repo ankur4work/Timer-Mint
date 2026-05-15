@@ -214,7 +214,7 @@ export function TimerForm({
               value={data.preText}
               onChange={handleStringChange("preText")}
               autoComplete="off"
-              placeholder="🔥 Sale ends in"
+              placeholder="Fresh drop ends in"
               helpText="Shown before the countdown"
               maxLength={100}
             />
@@ -224,7 +224,7 @@ export function TimerForm({
               value={data.postText}
               onChange={handleStringChange("postText")}
               autoComplete="off"
-              placeholder="Don't miss out!"
+              placeholder="Mint it before it ends"
               helpText="Shown after the countdown"
               maxLength={100}
             />
@@ -295,7 +295,7 @@ export function TimerForm({
                 error={getFieldError("textColor")}
               />
               <ColorPicker
-                label="Numbers"
+                label="Mint accent"
                 value={data.accentColor}
                 onChange={handleStringChange("accentColor")}
                 error={getFieldError("accentColor")}
@@ -363,13 +363,13 @@ export function getDefaultTimerFormData(): TimerFormData {
     dailyEndTime: "",
     preText: "",
     postText: "",
-    expiredText: "Offer expired!",
+    expiredText: "Mint closed!",
     ctaText: "",
     ctaUrl: "",
     position: "TOP",
-    backgroundColor: "#1a1a2e",
-    textColor: "#ffffff",
-    accentColor: "#eab308",
+    backgroundColor: "#0f172a",
+    textColor: "#f8fafc",
+    accentColor: "#34d399",
     fontFamily: "inherit",
     fontSize: "14px",
     animation: "",

@@ -152,7 +152,7 @@ export function SkeletonDashboard() {
 export function SkeletonTimerIndex() {
   return (
     <Card padding="0">
-      <Box padding="400" borderBlockEndWidth="025" borderColor="border-subdued">
+      <Box padding="400" borderBlockEndWidth="025" borderColor="border">
         <InlineStack align="space-between">
           <Box width="200px" background="bg-surface-secondary" borderRadius="200" minHeight="36px" />
           <InlineStack gap="200">
@@ -167,7 +167,7 @@ export function SkeletonTimerIndex() {
             key={i}
             padding="400"
             borderBlockEndWidth="025"
-            borderColor="border-subdued"
+            borderColor="border"
           >
             <InlineStack align="space-between" blockAlign="center">
               <Box width="150px">

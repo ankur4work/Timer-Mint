@@ -71,12 +71,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
                   { startDate: { lte: now } },
                 ],
               },
-              {
-                OR: [
-                  { endDate: null },
-                  { endDate: { gt: now } },
-                ],
-              },
+              { endDate: { gt: now } },
             ],
           },
           // Cart timers: always fetch
@@ -135,7 +130,45 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
 
     // Format timers for frontend
-    const formattedTimers = timers.map(timer => ({
+    const formattedTimers = timers.map((timer: {
+      id: string;
+      name: string;
+      type: string;
+      startDate: Date | null;
+      endDate: Date | null;
+      timezone: string | null;
+      evergreenDuration: number | null;
+      evergreenResetDelay: number | null;
+      dailyStartTime: string | null;
+      dailyEndTime: string | null;
+      recurringDays: string | null;
+      shippingCutoffTime: string | null;
+      shippingExcludedDays: string | null;
+      shippingHolidays: string | null;
+      shippingNextDayText: string | null;
+      cartThreshold: number | null;
+      cartTimerDuration: number | null;
+      expiredText: string | null;
+      preText: string | null;
+      postText: string | null;
+      linkUrl: string | null;
+      linkText: string | null;
+      backgroundColor: string;
+      textColor: string;
+      accentColor: string;
+      position: string;
+      animation: string;
+      showDays: boolean;
+      showHours: boolean;
+      showMinutes: boolean;
+      showSeconds: boolean;
+      showLabels: boolean;
+      closeButton: boolean;
+      stickyOnScroll: boolean;
+      showOnAllPages: boolean;
+      targetPages: string | null;
+      excludePages: string | null;
+    }) => ({
       id: timer.id,
       name: timer.name,
       type: timer.type,
@@ -172,7 +205,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
       showOnAllPages: timer.showOnAllPages,
       targetPages: timer.targetPages,
       excludePages: timer.excludePages,
-      expiredText: timer.expiredText || "Offer expired!",
+      expiredText: timer.expiredText || "Mint closed!",
     }));
 
     return json(

@@ -67,8 +67,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   });
 
   // Sum up impressions and clicks (simplified - in production would track daily)
-  const todayImpressions = activeTimersList.reduce((sum, t) => sum + t.impressions, 0);
-  const todayClicks = activeTimersList.reduce((sum, t) => sum + t.clicks, 0);
+  const todayImpressions = activeTimersList.reduce((sum: number, t: { impressions: number }) => sum + t.impressions, 0);
+  const todayClicks = activeTimersList.reduce((sum: number, t: { clicks: number }) => sum + t.clicks, 0);
 
   // Get recent timers (top 5)
   const recentTimers = await prisma.timer.findMany({
@@ -94,7 +94,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     activeTimers,
     todayImpressions,
     todayClicks,
-    recentTimers: recentTimers.map(t => ({
+    recentTimers: recentTimers.map((t: { id: string; name: string; type: string; status: string; endDate: Date }) => ({
       ...t,
       endDate: t.endDate.toISOString(),
     })),
@@ -219,7 +219,7 @@ function SetupChecklist({
                   <Box minWidth="16px" minHeight="16px" />
                 )}
               </Box>
-              <Box minWidth="0" style={{ flex: 1 }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
                 <Text as="span" variant="bodyMd" tone={step.done ? "subdued" : undefined}>
                   {step.done ? (
                     <s>{step.label}</s>
@@ -229,7 +229,7 @@ function SetupChecklist({
                     </Link>
                   )}
                 </Text>
-              </Box>
+              </div>
               {!step.done && (
                 <Button size="slim" url={step.url}>
                   Start
@@ -257,9 +257,9 @@ export default function Dashboard() {
           <Layout.Section>
             <Card>
               <EmptyState
-                heading="Welcome to Countdown Timer Bar!"
+                heading="Welcome to Timer Mint"
                 action={{
-                  content: "Create your first timer",
+                  content: "Create your first campaign",
                   url: "/app/timers/new",
                 }}
                 secondaryAction={{
@@ -271,10 +271,10 @@ export default function Dashboard() {
               >
                 <BlockStack gap="200">
                   <Text as="p" variant="bodyMd">
-                    Create urgency and boost conversions with customizable countdown timer bars.
+                    Launch polished urgency bars with Timer Mint and turn key moments into more conversions.
                   </Text>
                   <Text as="p" variant="bodyMd">
-                    Choose from multiple timer types: fixed countdowns, evergreen timers, recurring schedules, cart timers, and shipping cutoffs.
+                    Build fixed countdowns, evergreen offers, recurring schedules, cart nudges, and shipping cutoff campaigns from one workspace.
                   </Text>
                 </BlockStack>
               </EmptyState>
@@ -295,9 +295,9 @@ export default function Dashboard() {
 
   return (
     <Page
-      title="Dashboard"
+      title="Timer Mint overview"
       primaryAction={{
-        content: "Create Timer",
+        content: "Create campaign",
         url: "/app/timers/new",
         icon: PlusIcon,
       }}
@@ -359,13 +359,13 @@ export default function Dashboard() {
               </Text>
               <InlineStack gap="300" wrap>
                 <Button url="/app/timers/new" icon={PlusIcon}>
-                  Create Timer
+                  Create Campaign
                 </Button>
                 <Button url="/app/timers" variant="secondary">
-                  Manage Timers
+                  Manage Campaigns
                 </Button>
                 <Button url="/app/settings" variant="secondary" icon={SettingsIcon}>
-                  Settings
+                  Brand Studio
                 </Button>
               </InlineStack>
             </BlockStack>

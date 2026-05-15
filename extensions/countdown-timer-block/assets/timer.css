@@ -1,10 +1,10 @@
-/* Countdown Timer Bar Styles */
+/* Timer Mint Styles */
 
 /* CSS Custom Properties */
 :root {
-  --countdown-timer-bg: #000000;
-  --countdown-timer-text: #FFFFFF;
-  --countdown-timer-accent: #FF0000;
+  --countdown-timer-bg: #0f172a;
+  --countdown-timer-text: #f8fafc;
+  --countdown-timer-accent: #34d399;
   --countdown-timer-font-size: 14px;
   --countdown-timer-digit-size: 1.5em;
   --countdown-timer-padding: 12px 16px;

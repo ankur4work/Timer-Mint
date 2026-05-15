@@ -1,8 +1,8 @@
 {
-  "name": "Countdown Timer Bar",
+  "name": "Timer Mint",
   "settings": {
     "enabled": {
-      "label": "Enable countdown timer"
+      "label": "Enable Timer Mint bar"
     },
     "position": {
       "label": "Position",

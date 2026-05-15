@@ -408,9 +408,9 @@ export default function TimersIndex() {
   if (timers.length === 0 && !queryValue && statusFilter.length === 0 && typeFilter.length === 0) {
     return (
       <Page
-        title="Timers"
+        title="Campaigns"
         primaryAction={{
-          content: "Create timer",
+          content: "Create campaign",
           url: "/app/timers/new",
         }}
       >
@@ -418,16 +418,16 @@ export default function TimersIndex() {
           <Layout.Section>
             <Card>
               <EmptyState
-                heading="Create your first countdown timer"
+                heading="Create your first Timer Mint campaign"
                 action={{
-                  content: "Create timer",
+                  content: "Create campaign",
                   url: "/app/timers/new",
                 }}
                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
               >
                 <p>
-                  Add countdown timers to your store to create urgency and boost
-                  conversions. Choose from countdown, evergreen, or daily timer types.
+                  Launch urgency campaigns across your store with fixed countdowns,
+                  evergreen offers, and daily schedules tailored to each promotion.
                 </p>
               </EmptyState>
             </Card>
@@ -442,9 +442,9 @@ export default function TimersIndex() {
 
   return (
     <Page
-      title="Timers"
+      title="Campaigns"
       primaryAction={{
-        content: "Create timer",
+        content: "Create campaign",
         url: "/app/timers/new",
       }}
     >
@@ -466,7 +466,7 @@ export default function TimersIndex() {
           <Card padding="0">
             <IndexFilters
               queryValue={queryValue}
-              queryPlaceholder="Search timers..."
+              queryPlaceholder="Search campaigns..."
               onQueryChange={handleQueryChange}
               onQueryClear={handleQueryClear}
               tabs={tabs}
@@ -502,7 +502,7 @@ export default function TimersIndex() {
               <Box padding="400">
                 <BlockStack gap="200" align="center">
                   <Text as="p" variant="bodyMd" tone="subdued">
-                    No timers found matching your filters.
+                    No campaigns found matching your filters.
                   </Text>
                   <Button onClick={handleFiltersClearAll}>Clear filters</Button>
                 </BlockStack>

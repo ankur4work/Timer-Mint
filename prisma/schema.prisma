@@ -73,9 +73,9 @@ model Timer {
 
   // Display settings
   position        String    @default("TOP") // Position: TOP, BOTTOM
-  backgroundColor String    @default("#000000")
-  textColor       String    @default("#FFFFFF")
-  accentColor     String    @default("#FF0000")
+  backgroundColor String    @default("#0F172A")
+  textColor       String    @default("#F8FAFC")
+  accentColor     String    @default("#34D399")
 
   // Content
   preText         String?   // Text before the timer
