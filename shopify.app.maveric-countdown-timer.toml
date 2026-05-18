@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "913a8ca6f5cb34598fa3794dda5d2eb2"
-name = "Maveric CountDown timer"
-application_url = "https://countdown-timer-bar.vercel.app"
+name = "Timer Mint"
+application_url = "https://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io"
 embedded = true
 
 [webhooks]
@@ -17,11 +17,11 @@ api_version = "2024-10"
 scopes = "read_themes,write_themes"
 
 [auth]
-redirect_urls = [ "https://countdown-timer-bar.vercel.app/auth/callback" ]
+redirect_urls = [ "https://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io/auth/callback" ]
 
 [app_proxy]
-url = "https://countdown-timer-bar.vercel.app/apps/timer"
-subpath = "timer"
+url = "https://h362kcdfqpze9u2ajad7bwrf.91.239.208.85.sslip.io/apps/timer-mint"
+subpath = "timer-mint"
 prefix = "apps"
 
 [build]

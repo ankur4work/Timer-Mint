@@ -5,7 +5,7 @@
 
 {% if block.settings.enabled %}
   {% comment %} Get timer config from metafield {% endcomment %}
-  {% assign config = shop.metafields.countdown.timers_config.value %}
+  {% assign config = shop.metafields.timer_mint.timers_config.value %}
 
   {% if config.timers and config.timers.size > 0 %}
     {% assign first_timer = config.timers | first %}

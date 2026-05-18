@@ -4,12 +4,12 @@
  * GraphQL utilities for reading/writing timer config to shop metafields.
  * This allows the Liquid template to read timer data directly without API calls.
  *
- * Namespace: countdown
+ * Namespace: timer_mint
  * Key: timers_config
  */
 
 // Metafield constants
-export const METAFIELD_NAMESPACE = "countdown";
+export const METAFIELD_NAMESPACE = "timer_mint";
 export const METAFIELD_KEY = "timers_config";
 
 // GraphQL mutation to set metafield

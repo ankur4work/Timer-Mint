@@ -5,10 +5,10 @@
   // STORAGE KEYS
   // ============================================================================
   const STORAGE_KEYS = {
-    CLOSED: 'countdown_timer_closed',
-    IMPRESSIONS: 'countdown_timer_impressions',
-    EVERGREEN_PREFIX: 'countdown_evergreen_',
-    CART_PREFIX: 'countdown_cart_',
+    CLOSED: 'timer_mint_timer_closed',
+    IMPRESSIONS: 'timer_mint_timer_impressions',
+    EVERGREEN_PREFIX: 'timer_mint_evergreen_',
+    CART_PREFIX: 'timer_mint_cart_',
   };
 
   // ============================================================================
@@ -19,7 +19,7 @@
    * Generate a visitor ID for evergreen timer persistence
    */
   function getVisitorId() {
-    const key = 'countdown_visitor_id';
+    const key = 'timer_mint_visitor_id';
     let visitorId = null;
     try {
       visitorId = localStorage.getItem(key);
@@ -1046,14 +1046,14 @@
 
     const container = wrapper.querySelector('[data-timer-container]');
     if (!container) {
-      console.log('Countdown Timer: No timer container found');
+      console.log('Timer Mint: No timer container found');
       return;
     }
 
     // Get all timer elements rendered by Liquid
     const timerEls = container.querySelectorAll('[data-timer-id]');
     if (timerEls.length === 0) {
-      console.log('Countdown Timer: No timer elements found in DOM');
+      console.log('Timer Mint: No timer elements found in DOM');
       return;
     }
 
@@ -1117,10 +1117,10 @@
       wrapper.style.display = 'block';
       attachEventListeners(container);
       globalEngine.startCountdown();
-      console.log('Countdown Timer: Initialized', visibleCount, 'timer(s)');
+      console.log('Timer Mint: Initialized', visibleCount, 'timer(s)');
     } else {
       wrapper.style.display = 'none';
-      console.log('Countdown Timer: No active timers to display');
+      console.log('Timer Mint: No active timers to display');
     }
   }
 
