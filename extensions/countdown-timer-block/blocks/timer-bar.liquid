@@ -4,8 +4,8 @@
 {% endcomment %}
 
 {% if block.settings.enabled %}
-  {% comment %} Get timer config from metafield {% endcomment %}
-  {% assign config = shop.metafields.timer_mint.timers_config.value %}
+  {% comment %} Get timer config from app-owned metafield {% endcomment %}
+  {% assign config = app.metafields.timer_mint.timers_config.value %}
 
   {% if config.timers and config.timers.size > 0 %}
     {% assign first_timer = config.timers | first %}
