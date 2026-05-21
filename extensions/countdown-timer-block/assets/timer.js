@@ -220,6 +220,14 @@
       cartThreshold: dataset.cartThreshold ? parseFloat(dataset.cartThreshold) : null,
       cartTimerDuration: dataset.cartTimerDuration ? parseInt(dataset.cartTimerDuration) : null,
       expiredText: dataset.expiredText || null,
+      preText: dataset.preText || null,
+      postText: dataset.postText || null,
+      linkUrl: dataset.linkUrl || null,
+      linkText: dataset.linkText || null,
+      backgroundColor: dataset.backgroundColor || '#000000',
+      textColor: dataset.textColor || '#FFFFFF',
+      accentColor: dataset.accentColor || '#FF0000',
+      position: dataset.position || 'TOP',
       showDays: dataset.showDays !== 'false',
       showHours: dataset.showHours !== 'false',
       showMinutes: dataset.showMinutes !== 'false',
@@ -232,6 +240,142 @@
     };
   }
 
+  function getWrapperPositionStyle(position) {
+    switch (position) {
+      case 'BOTTOM':
+      case 'FLOATING_BOTTOM':
+        return 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;';
+      case 'FLOATING_TOP':
+      case 'TOP':
+        return 'position: fixed; top: 0; left: 0; right: 0; width: 100%;';
+      case 'TOP_LEFT':
+        return 'position: fixed; top: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);';
+      case 'TOP_RIGHT':
+        return 'position: fixed; top: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);';
+      case 'BOTTOM_LEFT':
+        return 'position: fixed; bottom: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);';
+      case 'BOTTOM_RIGHT':
+        return 'position: fixed; bottom: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);';
+      case 'LEFT_VERTICAL':
+        return 'position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: auto;';
+      case 'RIGHT_VERTICAL':
+        return 'position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: auto;';
+      default:
+        return 'position: fixed; top: 0; left: 0; right: 0; width: 100%;';
+    }
+  }
+
+  function renderTimerMarkup(timer) {
+    const showDays = timer.showDays !== false;
+    const showHours = timer.showHours !== false;
+    const showMinutes = timer.showMinutes !== false;
+    const showSeconds = timer.showSeconds !== false;
+    const showLabels = timer.showLabels !== false;
+    const closeButton = timer.closeButton !== false;
+    const position = timer.position || 'TOP';
+
+    return `
+      <div
+        class="countdown-timer-bar countdown-timer-bar--${escapeHTML(String(position).toLowerCase())}"
+        data-timer-id="${escapeHTML(String(timer.id || ''))}"
+        data-timer-type="${escapeHTML(String(timer.type || 'COUNTDOWN'))}"
+        data-end-time="${escapeHTML(String(timer.endDate || ''))}"
+        data-timezone="${escapeHTML(String(timer.timezone || 'UTC'))}"
+        ${timer.evergreenDuration != null ? `data-evergreen-duration="${escapeHTML(String(timer.evergreenDuration))}"` : ''}
+        ${timer.evergreenResetDelay != null ? `data-evergreen-reset-delay="${escapeHTML(String(timer.evergreenResetDelay))}"` : ''}
+        ${timer.dailyStartTime ? `data-daily-start-time="${escapeHTML(String(timer.dailyStartTime))}"` : ''}
+        ${timer.dailyEndTime ? `data-daily-end-time="${escapeHTML(String(timer.dailyEndTime))}"` : ''}
+        ${timer.recurringDays ? `data-recurring-days="${escapeHTML(String(timer.recurringDays))}"` : ''}
+        ${timer.shippingCutoffTime ? `data-shipping-cutoff-time="${escapeHTML(String(timer.shippingCutoffTime))}"` : ''}
+        ${timer.shippingExcludedDays ? `data-shipping-excluded-days="${escapeHTML(String(timer.shippingExcludedDays))}"` : ''}
+        ${timer.shippingHolidays ? `data-shipping-holidays="${escapeHTML(String(timer.shippingHolidays))}"` : ''}
+        ${timer.shippingNextDayText ? `data-shipping-next-day-text="${escapeHTML(String(timer.shippingNextDayText))}"` : ''}
+        ${timer.cartThreshold != null ? `data-cart-threshold="${escapeHTML(String(timer.cartThreshold))}"` : ''}
+        ${timer.cartTimerDuration != null ? `data-cart-timer-duration="${escapeHTML(String(timer.cartTimerDuration))}"` : ''}
+        ${timer.expiredText ? `data-expired-text="${escapeHTML(String(timer.expiredText))}"` : ''}
+        ${timer.preText ? `data-pre-text="${escapeHTML(String(timer.preText))}"` : ''}
+        ${timer.postText ? `data-post-text="${escapeHTML(String(timer.postText))}"` : ''}
+        ${timer.linkUrl ? `data-link-url="${escapeHTML(String(timer.linkUrl))}"` : ''}
+        ${timer.linkText ? `data-link-text="${escapeHTML(String(timer.linkText))}"` : ''}
+        data-background-color="${escapeHTML(String(timer.backgroundColor || '#000000'))}"
+        data-text-color="${escapeHTML(String(timer.textColor || '#FFFFFF'))}"
+        data-accent-color="${escapeHTML(String(timer.accentColor || '#FF0000'))}"
+        data-position="${escapeHTML(String(position))}"
+        data-show-days="${showDays}"
+        data-show-hours="${showHours}"
+        data-show-minutes="${showMinutes}"
+        data-show-seconds="${showSeconds}"
+        data-show-labels="${showLabels}"
+        data-close-button="${closeButton}"
+        data-show-on-all-pages="${timer.showOnAllPages !== false}"
+        ${timer.targetPages ? `data-target-pages="${escapeHTML(String(timer.targetPages))}"` : ''}
+        ${timer.excludePages ? `data-exclude-pages="${escapeHTML(String(timer.excludePages))}"` : ''}
+        style="--timer-bg: ${escapeHTML(String(timer.backgroundColor || '#000000'))}; --timer-text: ${escapeHTML(String(timer.textColor || '#FFFFFF'))}; --timer-accent: ${escapeHTML(String(timer.accentColor || '#FF0000'))}; display: none;"
+      >
+        <div class="countdown-timer-bar__content">
+          ${timer.preText ? `<span class="countdown-timer-bar__pre-text">${escapeHTML(String(timer.preText))}</span>` : ''}
+          <div class="countdown-timer-bar__countdown" data-countdown>
+            ${showDays ? `<div class="countdown-timer-bar__unit"><span class="countdown-timer-bar__digit" data-days>00</span>${showLabels ? '<span class="countdown-timer-bar__label">Days</span>' : ''}</div><span class="countdown-timer-bar__separator">:</span>` : ''}
+            ${showHours ? `<div class="countdown-timer-bar__unit"><span class="countdown-timer-bar__digit" data-hours>00</span>${showLabels ? '<span class="countdown-timer-bar__label">Hrs</span>' : ''}</div><span class="countdown-timer-bar__separator">:</span>` : ''}
+            ${showMinutes ? `<div class="countdown-timer-bar__unit"><span class="countdown-timer-bar__digit" data-minutes>00</span>${showLabels ? '<span class="countdown-timer-bar__label">Min</span>' : ''}</div><span class="countdown-timer-bar__separator">:</span>` : ''}
+            ${showSeconds ? `<div class="countdown-timer-bar__unit"><span class="countdown-timer-bar__digit" data-seconds>00</span>${showLabels ? '<span class="countdown-timer-bar__label">Sec</span>' : ''}</div>` : ''}
+          </div>
+          ${timer.postText ? `<span class="countdown-timer-bar__post-text">${escapeHTML(String(timer.postText))}</span>` : ''}
+          ${timer.linkUrl && timer.linkText ? `<a href="${escapeHTML(String(timer.linkUrl))}" class="countdown-timer-bar__cta" data-timer-cta="${escapeHTML(String(timer.id || ''))}">${escapeHTML(String(timer.linkText))}</a>` : ''}
+        </div>
+        ${closeButton ? `<button class="countdown-timer-bar__close" data-timer-close="${escapeHTML(String(timer.id || ''))}" aria-label="Close timer"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M12.207 4.793a1 1 0 0 1 0 1.414L9.414 9l2.793 2.793a1 1 0 0 1-1.414 1.414L8 10.414l-2.793 2.793a1 1 0 0 1-1.414-1.414L6.586 9 3.793 6.207a1 1 0 0 1 1.414-1.414L8 7.586l2.793-2.793a1 1 0 0 1 1.414 0z"/></svg></button>` : ''}
+      </div>
+    `;
+  }
+
+  async function fetchProxyTimers(proxyUrl) {
+    try {
+      const response = await fetch(proxyUrl, {
+        credentials: 'same-origin',
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        return [];
+      }
+
+      const data = await response.json();
+      return Array.isArray(data.timers) ? data.timers : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  async function ensureTimerElements(wrapper, container) {
+    let timerEls = container.querySelectorAll('[data-timer-id]');
+
+    if (timerEls.length > 0) {
+      return timerEls;
+    }
+
+    const proxyUrl = wrapper.dataset.proxyUrl || '/apps/timer-mint/active';
+    const timers = await fetchProxyTimers(proxyUrl);
+    if (timers.length === 0) {
+      return timerEls;
+    }
+
+    const firstTimer = timers[0];
+    const wrapperPosition = firstTimer.position || 'TOP';
+    wrapper.dataset.position = wrapperPosition;
+    wrapper.className = `countdown-timer-bar-wrapper countdown-timer-bar-wrapper--${String(wrapperPosition)}`;
+    wrapper.style.cssText = `${getWrapperPositionStyle(wrapperPosition)} z-index: 999999;`;
+    container.innerHTML = timers.map(renderTimerMarkup).join('');
+
+    return container.querySelectorAll('[data-timer-id]');
+  }
+
+  // ============================================================================
+  // BASE TIMER HANDLER
+  // ============================================================================
+
+  class TimerHandler {
   // ============================================================================
   // BASE TIMER HANDLER
   // ============================================================================
@@ -1070,10 +1214,10 @@
       return;
     }
 
-    // Get all timer elements rendered by Liquid
-    const timerEls = container.querySelectorAll('[data-timer-id]');
+    // Get all timer elements rendered by Liquid or fetched from the app proxy fallback
+    const timerEls = await ensureTimerElements(wrapper, container);
     if (timerEls.length === 0) {
-      console.log('Timer Mint: No timer elements found in DOM');
+      console.log('Timer Mint: No timer elements found in DOM or proxy');
       return;
     }
 
