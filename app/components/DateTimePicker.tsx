@@ -86,11 +86,8 @@ function formatDateTimeLocal(date: Date, hour: string, minute: string): string {
 
 function formatDisplayDate(date: Date | null): string {
   if (!date) return "";
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${monthNames[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
 export function DateTimePicker({

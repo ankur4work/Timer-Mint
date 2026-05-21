@@ -3,7 +3,8 @@
 export function formatTimerDate(date: Date | string | null): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
-  const month = d.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[d.getUTCMonth()];
   const day = d.getUTCDate();
   const year = d.getUTCFullYear();
   const hours = d.getUTCHours().toString().padStart(2, "0");
