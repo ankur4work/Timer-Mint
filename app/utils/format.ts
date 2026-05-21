@@ -3,14 +3,12 @@
 export function formatTimerDate(date: Date | string | null): string {
   if (!date) return "—";
   const d = typeof date === "string" ? new Date(date) : date;
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "UTC",
-  });
+  const month = d.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+  const day = d.getUTCDate();
+  const year = d.getUTCFullYear();
+  const hours = d.getUTCHours().toString().padStart(2, "0");
+  const minutes = d.getUTCMinutes().toString().padStart(2, "0");
+  return `${month} ${day}, ${year}, ${hours}:${minutes}`;
 }
 
 export function formatDateForInput(date: string | Date | null): string {
