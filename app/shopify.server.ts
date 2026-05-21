@@ -8,6 +8,7 @@ import {
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-01";
 import prisma from "./db.server";
+import { syncTimersToMetafield } from "~/utils/sync.server";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -30,8 +31,18 @@ const shopify = shopifyApp({
     },
   },
   hooks: {
-    afterAuth: async ({ session }) => {
-      shopify.registerWebhooks({ session });
+    afterAuth: async ({ session, admin }) => {
+      try {
+        await shopify.registerWebhooks({ session });
+      } catch (error) {
+        console.error("Failed to register webhooks after auth:", error);
+      }
+
+      try {
+        await syncTimersToMetafield(admin, session.shop);
+      } catch (error) {
+        console.error("Failed to sync timers after auth:", error);
+      }
     },
   },
   future: {
