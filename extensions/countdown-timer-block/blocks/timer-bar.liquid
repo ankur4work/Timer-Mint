@@ -59,10 +59,10 @@
               {% if timer.evergreenResetDelay %}data-evergreen-reset-delay="{{ timer.evergreenResetDelay }}"{% endif %}
               {% if timer.dailyStartTime %}data-daily-start-time="{{ timer.dailyStartTime }}"{% endif %}
               {% if timer.dailyEndTime %}data-daily-end-time="{{ timer.dailyEndTime }}"{% endif %}
-              {% if timer.recurringDays %}data-recurring-days="{{ timer.recurringDays }}"{% endif %}
+              {% if timer.recurringDays %}data-recurring-days="{{ timer.recurringDays | escape }}"{% endif %}
               {% if timer.shippingCutoffTime %}data-shipping-cutoff-time="{{ timer.shippingCutoffTime }}"{% endif %}
-              {% if timer.shippingExcludedDays %}data-shipping-excluded-days="{{ timer.shippingExcludedDays }}"{% endif %}
-              {% if timer.shippingHolidays %}data-shipping-holidays="{{ timer.shippingHolidays }}"{% endif %}
+              {% if timer.shippingExcludedDays %}data-shipping-excluded-days="{{ timer.shippingExcludedDays | escape }}"{% endif %}
+              {% if timer.shippingHolidays %}data-shipping-holidays="{{ timer.shippingHolidays | escape }}"{% endif %}
               {% if timer.shippingNextDayText %}data-shipping-next-day-text="{{ timer.shippingNextDayText | escape }}"{% endif %}
               {% if timer.cartThreshold %}data-cart-threshold="{{ timer.cartThreshold }}"{% endif %}
               {% if timer.cartTimerDuration %}data-cart-timer-duration="{{ timer.cartTimerDuration }}"{% endif %}
@@ -74,8 +74,8 @@
               data-show-labels="{{ timer.showLabels | default: true }}"
               data-close-button="{{ timer.closeButton | default: true }}"
               data-show-on-all-pages="{{ timer.showOnAllPages | default: true }}"
-              {% if timer.targetPages %}data-target-pages="{{ timer.targetPages }}"{% endif %}
-              {% if timer.excludePages %}data-exclude-pages="{{ timer.excludePages }}"{% endif %}
+              {% if timer.targetPages %}data-target-pages="{{ timer.targetPages | escape }}"{% endif %}
+              {% if timer.excludePages %}data-exclude-pages="{{ timer.excludePages | escape }}"{% endif %}
               style="
                 --timer-bg: {{ timer.backgroundColor | default: '#000000' }};
                 --timer-text: {{ timer.textColor | default: '#FFFFFF' }};

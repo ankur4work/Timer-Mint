@@ -959,36 +959,56 @@
   // PAGE TARGETING
   // ============================================================================
 
+  function parsePagePatterns(value) {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value.map(pattern => String(pattern).trim()).filter(Boolean);
+    }
+
+    if (typeof value !== 'string') {
+      return [];
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) return [];
+
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed.map(pattern => String(pattern).trim()).filter(Boolean);
+      }
+      if (typeof parsed === 'string' && parsed.trim()) {
+        return [parsed.trim()];
+      }
+    } catch (e) {
+      // Fall back to plain-text parsing
+    }
+
+    return trimmed
+      .split(/[\n,]+/)
+      .map(pattern => pattern.trim())
+      .filter(Boolean);
+  }
+
   /**
    * Check if timer should show on current page
    */
   function shouldShowOnPage(timer) {
     const currentPath = window.location.pathname;
+    const excludePatterns = parsePagePatterns(timer.excludePages);
+    const targetPatterns = parsePagePatterns(timer.targetPages);
 
     // Show on all pages by default
     if (timer.showOnAllPages) {
-      // Check excludes
-      if (timer.excludePages) {
-        try {
-          const excludes = JSON.parse(timer.excludePages);
-          if (excludes.some(pattern => matchPage(currentPath, pattern))) {
-            return false;
-          }
-        } catch (e) {
-          // Invalid JSON, ignore
-        }
+      if (excludePatterns.some(pattern => matchPage(currentPath, pattern))) {
+        return false;
       }
       return true;
     }
 
-    // Check specific target pages
-    if (timer.targetPages) {
-      try {
-        const targets = JSON.parse(timer.targetPages);
-        return targets.some(pattern => matchPage(currentPath, pattern));
-      } catch (e) {
-        // Invalid JSON, ignore
-      }
+    if (targetPatterns.length > 0) {
+      return targetPatterns.some(pattern => matchPage(currentPath, pattern));
     }
 
     return false;

@@ -24,6 +24,7 @@ import {
   upsertShopSubscription,
   cancelShopSubscription,
   cancelSubscriptionOnShopify,
+  getBillingPlans,
 } from "~/lib/billing.server";
 import {
   PLANS,
@@ -41,9 +42,11 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     getShopPlan(shop),
     getShopSubscription(shop),
   ]);
+  const plans = getBillingPlans();
 
   return json({
     currentPlan,
+    plans,
     subscription: subscription
       ? {
           ...subscription,
@@ -105,18 +108,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 function PlanCard({
   planKey,
+  plan,
   currentPlan,
   onSubscribe,
   onCancel,
   isLoading,
 }: {
   planKey: PlanName;
+  plan: (typeof PLANS)[PlanName];
   currentPlan: PlanName;
   onSubscribe: (plan: PlanName) => void;
   onCancel: () => void;
   isLoading: boolean;
 }) {
-  const plan = PLANS[planKey];
   const isCurrent = planKey === currentPlan;
   const isDowngrade = planKey === PLAN_FREE && currentPlan !== PLAN_FREE;
 
@@ -182,7 +186,7 @@ function PlanCard({
 }
 
 export default function BillingPage() {
-  const { currentPlan, subscription } = useLoaderData<typeof loader>();
+  const { currentPlan, plans, subscription } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
 
   // useFetcher handles Shopify embedded app session auth automatically
@@ -290,6 +294,7 @@ export default function BillingPage() {
           <InlineGrid columns={{ xs: 1, sm: 1, md: 3 }} gap="400">
             <PlanCard
               planKey={PLAN_FREE}
+              plan={plans[PLAN_FREE]}
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
@@ -297,6 +302,7 @@ export default function BillingPage() {
             />
             <PlanCard
               planKey={PLAN_STANDARD}
+              plan={plans[PLAN_STANDARD]}
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
@@ -304,6 +310,7 @@ export default function BillingPage() {
             />
             <PlanCard
               planKey={PLAN_PREMIUM}
+              plan={plans[PLAN_PREMIUM]}
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
