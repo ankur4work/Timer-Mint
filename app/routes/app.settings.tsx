@@ -1,5 +1,5 @@
 import { json, type LoaderFunctionArgs, type ActionFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useActionData, useNavigation, Form, useRouteError, isRouteErrorResponse } from "@remix-run/react";
+import { useLoaderData, useActionData, useNavigation, Form, useNavigate, useRouteError, isRouteErrorResponse } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -135,6 +135,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 export default function SettingsPage() {
   const { settings } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
+  const navigate = useNavigate();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
@@ -171,7 +172,7 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <Page title="Brand Studio" backAction={{ content: "Home", url: "/app" }}>
+    <Page title="Brand Studio" backAction={{ content: "Home", onAction: () => navigate("/app") }}>
       <Form method="post">
         <Layout>
           {showToast && actionData?.success && (
@@ -418,6 +419,7 @@ export default function SettingsPage() {
 // Error Boundary
 export function ErrorBoundary() {
   const error = useRouteError();
+  const navigate = useNavigate();
 
   let message = "Something went wrong loading settings";
 
@@ -428,7 +430,7 @@ export function ErrorBoundary() {
   }
 
   return (
-    <Page title="Settings Error" backAction={{ content: "Home", url: "/app" }}>
+    <Page title="Settings Error" backAction={{ content: "Home", onAction: () => navigate("/app") }}>
       <Layout>
         <Layout.Section>
           <Card>
@@ -442,7 +444,7 @@ export function ErrorBoundary() {
                 <Button onClick={() => window.location.reload()}>
                   Try again
                 </Button>
-                <Button variant="plain" url="/app">
+                <Button variant="plain" onClick={() => navigate("/app")}>
                   Back to Dashboard
                 </Button>
               </InlineStack>

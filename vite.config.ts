@@ -41,6 +41,7 @@ export default defineConfig({
     },
   },
   plugins: [
+    tsconfigPaths(),
     remix({
       ignoredRouteFiles: ["**/.*"],
       future: {
@@ -49,7 +50,6 @@ export default defineConfig({
         v3_throwAbortReason: true,
       },
     }),
-    tsconfigPaths(),
   ],
   build: {
     assetsInlineLimit: 0,

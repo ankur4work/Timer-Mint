@@ -129,45 +129,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
 
     // Filter recurring timers by time of day (server-side pre-filter, client handles final decision)
-    const filteredTimers = timers.filter((timer: {
-      id: string;
-      name: string;
-      type: string;
-      startDate: Date | null;
-      endDate: Date | null;
-      timezone: string | null;
-      evergreenDuration: number | null;
-      evergreenResetDelay: number | null;
-      dailyStartTime: string | null;
-      dailyEndTime: string | null;
-      recurringDays: string | null;
-      shippingCutoffTime: string | null;
-      shippingExcludedDays: string | null;
-      shippingHolidays: string | null;
-      shippingNextDayText: string | null;
-      cartThreshold: number | null;
-      cartTimerDuration: number | null;
-      expiredText: string | null;
-      preText: string | null;
-      postText: string | null;
-      linkUrl: string | null;
-      linkText: string | null;
-      backgroundColor: string;
-      textColor: string;
-      accentColor: string;
-      position: string;
-      animation: string;
-      showDays: boolean;
-      showHours: boolean;
-      showMinutes: boolean;
-      showSeconds: boolean;
-      showLabels: boolean;
-      closeButton: boolean;
-      stickyOnScroll: boolean;
-      showOnAllPages: boolean;
-      targetPages: string | null;
-      excludePages: string | null;
-    }) => {
+    const filteredTimers = timers.filter((timer) => {
       if (timer.type === "DAILY_RECURRING" || timer.type === "RECURRING" || timer.type === "DAILY") {
         return isDailyTimerActive(timer, now);
       }
@@ -175,45 +137,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     });
 
     // Format timers for frontend
-    const formattedTimers = filteredTimers.map((timer: {
-      id: string;
-      name: string;
-      type: string;
-      startDate: Date | null;
-      endDate: Date | null;
-      timezone: string | null;
-      evergreenDuration: number | null;
-      evergreenResetDelay: number | null;
-      dailyStartTime: string | null;
-      dailyEndTime: string | null;
-      recurringDays: string | null;
-      shippingCutoffTime: string | null;
-      shippingExcludedDays: string | null;
-      shippingHolidays: string | null;
-      shippingNextDayText: string | null;
-      cartThreshold: number | null;
-      cartTimerDuration: number | null;
-      expiredText: string | null;
-      preText: string | null;
-      postText: string | null;
-      linkUrl: string | null;
-      linkText: string | null;
-      backgroundColor: string;
-      textColor: string;
-      accentColor: string;
-      position: string;
-      animation: string;
-      showDays: boolean;
-      showHours: boolean;
-      showMinutes: boolean;
-      showSeconds: boolean;
-      showLabels: boolean;
-      closeButton: boolean;
-      stickyOnScroll: boolean;
-      showOnAllPages: boolean;
-      targetPages: string | null;
-      excludePages: string | null;
-    }) => ({
+    const formattedTimers = filteredTimers.map((timer) => ({
       id: timer.id,
       name: timer.name,
       type: timer.type,
