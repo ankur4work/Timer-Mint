@@ -15,11 +15,13 @@ import {
   InlineStack,
   Box,
 } from "@shopify/polaris";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { authenticate } from "~/shopify.server";
 import {
   getShopSubscription,
   getShopPlan,
+  createSubscription,
+  upsertShopSubscription,
   cancelShopSubscription,
   cancelSubscriptionOnShopify,
   getBillingPlans,
@@ -62,6 +64,30 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const formData = await request.formData();
   const intent = formData.get("intent") as string;
+
+  if (intent === "subscribe") {
+    const plan = formData.get("plan") as PlanName;
+    if (!PLANS[plan] || plan === PLAN_FREE) {
+      return json({ error: "Invalid plan selected" }, { status: 400 });
+    }
+
+    const appUrl = process.env.SHOPIFY_APP_URL || "";
+    const isTest = process.env.SHOPIFY_BILLING_TEST === "true";
+    const returnUrl = `${appUrl}/api/billing/callback?plan=${plan}&shop=${shop}`;
+
+    const result = await createSubscription(admin, plan, returnUrl, isTest);
+
+    if (result.userErrors?.length) {
+      return json({ error: result.userErrors[0].message }, { status: 400 });
+    }
+
+    if (!result.confirmationUrl || !result.appSubscription) {
+      return json({ error: "Failed to create subscription" }, { status: 500 });
+    }
+
+    await upsertShopSubscription(shop, plan, result.appSubscription.id, "PENDING");
+    return json({ confirmationUrl: result.confirmationUrl });
+  }
 
   if (intent === "cancel") {
     const subscription = await getShopSubscription(shop);
@@ -162,12 +188,35 @@ export default function BillingPage() {
   const { currentPlan, plans, subscription } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const subscribeFetcher = useFetcher<typeof action>();
   const cancelFetcher = useFetcher<typeof action>();
+  const [subscribingPlan, setSubscribingPlan] = useState<PlanName | null>(null);
 
+  const isSubscribing = subscribeFetcher.state !== "idle";
   const isCancelling = cancelFetcher.state !== "idle";
   const success = searchParams.get("success") === "true";
   const cancelled = searchParams.get("cancelled") === "true";
   const errorParam = searchParams.get("error") === "true";
+  const subscribeError =
+    subscribeFetcher.data && "error" in subscribeFetcher.data
+      ? subscribeFetcher.data.error
+      : null;
+
+  useEffect(() => {
+    if (subscribeFetcher.state === "idle") {
+      setSubscribingPlan(null);
+    }
+  }, [subscribeFetcher.state]);
+
+  useEffect(() => {
+    if (
+      subscribeFetcher.data &&
+      "confirmationUrl" in subscribeFetcher.data &&
+      subscribeFetcher.data.confirmationUrl
+    ) {
+      window.open(subscribeFetcher.data.confirmationUrl, "_top");
+    }
+  }, [subscribeFetcher.data]);
 
   useEffect(() => {
     if (
@@ -180,7 +229,11 @@ export default function BillingPage() {
   }, [cancelFetcher.data, navigate]);
 
   const handleSubscribe = (plan: PlanName) => {
-    window.open(`/app/billing/start?plan=${plan}`, "_top");
+    setSubscribingPlan(plan);
+    const formData = new FormData();
+    formData.set("intent", "subscribe");
+    formData.set("plan", plan);
+    subscribeFetcher.submit(formData, { method: "post" });
   };
 
   const handleCancel = () => {
@@ -209,10 +262,11 @@ export default function BillingPage() {
             </Banner>
           </Layout.Section>
         )}
-        {errorParam && (
+        {(errorParam || subscribeError) && (
           <Layout.Section>
             <Banner tone="critical" title="Something went wrong">
-              There was an error processing your subscription. Please try again.
+              {subscribeError ||
+                "There was an error processing your subscription. Please try again."}
             </Banner>
           </Layout.Section>
         )}
@@ -242,7 +296,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={false}
+              isLoading={subscribingPlan === PLAN_STANDARD && isSubscribing}
             />
             <PlanCard
               planKey={PLAN_PREMIUM}
@@ -250,7 +304,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={false}
+              isLoading={subscribingPlan === PLAN_PREMIUM && isSubscribing}
             />
           </InlineGrid>
         </Layout.Section>
