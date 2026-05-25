@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useSearchParams, useFetcher } from "@remix-run/react";
+import { useLoaderData, useSearchParams, useFetcher, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -15,13 +15,11 @@ import {
   InlineStack,
   Box,
 } from "@shopify/polaris";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { authenticate } from "~/shopify.server";
 import {
   getShopSubscription,
   getShopPlan,
-  createSubscription,
-  upsertShopSubscription,
   cancelShopSubscription,
   cancelSubscriptionOnShopify,
   getBillingPlans,
@@ -64,31 +62,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
   const formData = await request.formData();
   const intent = formData.get("intent") as string;
-
-  if (intent === "subscribe") {
-    const plan = formData.get("plan") as PlanName;
-    if (!PLANS[plan] || plan === PLAN_FREE) {
-      return json({ error: "Invalid plan selected" }, { status: 400 });
-    }
-
-    const appUrl = process.env.SHOPIFY_APP_URL || "";
-    const isTest = process.env.SHOPIFY_BILLING_TEST === "true";
-    const returnUrl = `${appUrl}/api/billing/callback?plan=${plan}&shop=${shop}`;
-
-    const result = await createSubscription(admin, plan, returnUrl, isTest);
-
-    if (result.userErrors && result.userErrors.length > 0) {
-      return json({ error: result.userErrors[0].message }, { status: 400 });
-    }
-
-    if (!result.confirmationUrl || !result.appSubscription) {
-      return json({ error: "Failed to create subscription" }, { status: 500 });
-    }
-
-    await upsertShopSubscription(shop, plan, result.appSubscription.id, "PENDING");
-
-    return json({ confirmationUrl: result.confirmationUrl });
-  }
 
   if (intent === "cancel") {
     const subscription = await getShopSubscription(shop);
@@ -188,62 +161,26 @@ function PlanCard({
 export default function BillingPage() {
   const { currentPlan, plans, subscription } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
-
-  // useFetcher handles Shopify embedded app session auth automatically
-  const subscribeFetcher = useFetcher<typeof action>();
+  const navigate = useNavigate();
   const cancelFetcher = useFetcher<typeof action>();
 
-  // Track WHICH plan is being subscribed to so only that button shows loading
-  const [subscribingPlan, setSubscribingPlan] = useState<PlanName | null>(null);
-
-  const isSubscribing = subscribeFetcher.state !== "idle";
   const isCancelling = cancelFetcher.state !== "idle";
-
-  // Reset tracked plan when fetcher goes idle
-  useEffect(() => {
-    if (subscribeFetcher.state === "idle") {
-      setSubscribingPlan(null);
-    }
-  }, [subscribeFetcher.state]);
-
   const success = searchParams.get("success") === "true";
   const cancelled = searchParams.get("cancelled") === "true";
   const errorParam = searchParams.get("error") === "true";
 
-  // Get error from fetcher response
-  const subscribeError =
-    subscribeFetcher.data && "error" in subscribeFetcher.data
-      ? subscribeFetcher.data.error
-      : null;
-
-  // When we get a confirmationUrl, break out of the iframe
-  useEffect(() => {
-    if (
-      subscribeFetcher.data &&
-      "confirmationUrl" in subscribeFetcher.data &&
-      subscribeFetcher.data.confirmationUrl
-    ) {
-      window.open(subscribeFetcher.data.confirmationUrl, "_top");
-    }
-  }, [subscribeFetcher.data]);
-
-  // After cancel, reload so the loader re-fetches the updated plan
   useEffect(() => {
     if (
       cancelFetcher.data &&
       "cancelled" in cancelFetcher.data &&
       cancelFetcher.data.cancelled
     ) {
-      window.location.href = "/app/billing?cancelled=true";
+      navigate("/app/billing?cancelled=true");
     }
-  }, [cancelFetcher.data]);
+  }, [cancelFetcher.data, navigate]);
 
   const handleSubscribe = (plan: PlanName) => {
-    setSubscribingPlan(plan);
-    const formData = new FormData();
-    formData.set("intent", "subscribe");
-    formData.set("plan", plan);
-    subscribeFetcher.submit(formData, { method: "post" });
+    window.open(`/app/billing/start?plan=${plan}`, "_top");
   };
 
   const handleCancel = () => {
@@ -272,11 +209,10 @@ export default function BillingPage() {
             </Banner>
           </Layout.Section>
         )}
-        {(errorParam || subscribeError) && (
+        {errorParam && (
           <Layout.Section>
             <Banner tone="critical" title="Something went wrong">
-              {subscribeError ||
-                "There was an error processing your subscription. Please try again."}
+              There was an error processing your subscription. Please try again.
             </Banner>
           </Layout.Section>
         )}
@@ -306,7 +242,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={subscribingPlan === PLAN_STANDARD && isSubscribing}
+              isLoading={false}
             />
             <PlanCard
               planKey={PLAN_PREMIUM}
@@ -314,7 +250,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={subscribingPlan === PLAN_PREMIUM && isSubscribing}
+              isLoading={false}
             />
           </InlineGrid>
         </Layout.Section>

@@ -3,9 +3,10 @@
   "description": "Timer Mint Shopify embedded app",
   "private": true,
   "scripts": {
-    "build": "remix vite:build",
+    "build": "npm run prisma:generate && remix vite:build",
     "dev": "shopify app dev",
-    "start": "remix-serve ./build/server/index.js",
+    "start": "npm run start:check && remix-serve ./build/server/index.js",
+    "start:check": "node ./scripts/check-env.mjs",
     "config:link": "shopify app config link",
     "config:push": "shopify app config push",
     "generate": "shopify app generate",
@@ -13,7 +14,9 @@
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "shopify": "shopify",
     "prisma": "prisma",
-    "setup": "prisma generate && prisma migrate deploy",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "setup": "npm run start:check && npm run prisma:generate && npm run prisma:migrate",
     "typecheck": "tsc"
   },
   "type": "module",

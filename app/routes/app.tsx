@@ -1,6 +1,5 @@
 import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { useEffect, useState } from "react";
 import { Link, Outlet, useLoaderData, useRouteError } from "@remix-run/react";
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { AppProvider } from "@shopify/shopify-app-remix/react";
@@ -18,15 +17,6 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export default function App() {
   const { apiKey } = useLoaderData<typeof loader>();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <AppProvider isEmbeddedApp apiKey={apiKey}>
@@ -43,7 +33,6 @@ export default function App() {
   );
 }
 
-// Shopify needs Alarm Alarm Alarm
 export function ErrorBoundary() {
   return boundary.error(useRouteError());
 }
