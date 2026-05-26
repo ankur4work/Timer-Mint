@@ -6,47 +6,46 @@
 {% if block.settings.enabled %}
   {% comment %} Get timer config from app-owned metafield {% endcomment %}
   {% assign config = app.metafields.timer_mint.timers_config.value %}
+  {% assign first_timer = config.timers | first %}
+  {% assign wrapper_position = first_timer.position | default: 'TOP' %}
 
-  {% if config.timers and config.timers.size > 0 %}
-    {% assign first_timer = config.timers | first %}
-    {% assign wrapper_position = first_timer.position | default: 'TOP' %}
+  {% comment %} Determine inline positioning styles based on position {% endcomment %}
+  {% case wrapper_position %}
+    {% when 'TOP' %}
+      {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+    {% when 'BOTTOM' %}
+      {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
+    {% when 'FLOATING_TOP' %}
+      {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+    {% when 'FLOATING_BOTTOM' %}
+      {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
+    {% when 'TOP_LEFT' %}
+      {% assign position_style = 'position: fixed; top: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+    {% when 'TOP_RIGHT' %}
+      {% assign position_style = 'position: fixed; top: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+    {% when 'BOTTOM_LEFT' %}
+      {% assign position_style = 'position: fixed; bottom: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+    {% when 'BOTTOM_RIGHT' %}
+      {% assign position_style = 'position: fixed; bottom: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
+    {% when 'LEFT_VERTICAL' %}
+      {% assign position_style = 'position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: auto;' %}
+    {% when 'RIGHT_VERTICAL' %}
+      {% assign position_style = 'position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: auto;' %}
+    {% else %}
+      {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
+  {% endcase %}
 
-    {% comment %} Determine inline positioning styles based on position {% endcomment %}
-    {% case wrapper_position %}
-      {% when 'TOP' %}
-        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
-      {% when 'BOTTOM' %}
-        {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
-      {% when 'FLOATING_TOP' %}
-        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
-      {% when 'FLOATING_BOTTOM' %}
-        {% assign position_style = 'position: fixed; bottom: 0; left: 0; right: 0; width: 100%;' %}
-      {% when 'TOP_LEFT' %}
-        {% assign position_style = 'position: fixed; top: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
-      {% when 'TOP_RIGHT' %}
-        {% assign position_style = 'position: fixed; top: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
-      {% when 'BOTTOM_LEFT' %}
-        {% assign position_style = 'position: fixed; bottom: 20px; left: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
-      {% when 'BOTTOM_RIGHT' %}
-        {% assign position_style = 'position: fixed; bottom: 20px; right: 20px; width: 320px; max-width: calc(100vw - 40px);' %}
-      {% when 'LEFT_VERTICAL' %}
-        {% assign position_style = 'position: fixed; top: 50%; left: 0; transform: translateY(-50%); width: auto;' %}
-      {% when 'RIGHT_VERTICAL' %}
-        {% assign position_style = 'position: fixed; top: 50%; right: 0; transform: translateY(-50%); width: auto;' %}
-      {% else %}
-        {% assign position_style = 'position: fixed; top: 0; left: 0; right: 0; width: 100%;' %}
-    {% endcase %}
-
-    <div
-      id="countdown-timer-bar-{{ block.id }}"
-      class="countdown-timer-bar-wrapper countdown-timer-bar-wrapper--{{ wrapper_position }}"
-      data-block-id="{{ block.id }}"
-      data-position="{{ wrapper_position }}"
-      data-proxy-url="/apps/timer-mint/active"
-      style="{{ position_style }} z-index: 999999;"
-    >
-      {%- comment -%} Render timer(s) from metafield data {%- endcomment -%}
-      <div class="countdown-timer-bar__container" data-timer-container>
+  <div
+    id="countdown-timer-bar-{{ block.id }}"
+    class="countdown-timer-bar-wrapper countdown-timer-bar-wrapper--{{ wrapper_position }}"
+    data-block-id="{{ block.id }}"
+    data-position="{{ wrapper_position }}"
+    data-proxy-url="/apps/timer-mint/active"
+    style="{{ position_style }} z-index: 999999;"
+  >
+    {%- comment -%} Render timer(s) from metafield data when available; JS will fall back to proxy if empty {%- endcomment -%}
+    <div class="countdown-timer-bar__container" data-timer-container>
+      {% if config.timers and config.timers.size > 0 %}
         {% for timer in config.timers %}
           {% comment %} Only render ACTIVE timers {% endcomment %}
           {% if timer.status == 'ACTIVE' %}
@@ -159,14 +158,12 @@
             </div>
           {% endif %}
         {% endfor %}
-      </div>
+      {% endif %}
     </div>
+  </div>
 
-    {{ 'timer.css' | asset_url | stylesheet_tag }}
-    <script src="{{ 'timer.js' | asset_url }}" defer></script>
-  {% else %}
-    {% comment %} No active timers - render nothing {% endcomment %}
-  {% endif %}
+  {{ 'timer.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'timer.js' | asset_url }}" defer></script>
 
   {%- comment -%} No-JS fallback {%- endcomment -%}
   <noscript>

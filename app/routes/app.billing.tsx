@@ -1,5 +1,5 @@
 import { json, type ActionFunctionArgs, type LoaderFunctionArgs } from "@remix-run/node";
-import { useLoaderData, useSearchParams, useFetcher, useNavigate } from "@remix-run/react";
+import { useLoaderData, useSearchParams, useNavigate } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -15,7 +15,7 @@ import {
   InlineStack,
   Box,
 } from "@shopify/polaris";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { authenticate } from "~/shopify.server";
 import {
   getShopSubscription,
@@ -44,6 +44,9 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   ]);
   const plans = getBillingPlans();
 
+  const url = new URL(request.url);
+  const host = url.searchParams.get("host");
+
   return json({
     currentPlan,
     plans,
@@ -55,6 +58,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
         }
       : null,
     shop,
+    host,
   });
 };
 
@@ -75,7 +79,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     const isTest = process.env.SHOPIFY_BILLING_TEST === "true";
     const requestUrl = new URL(request.url);
     const callbackParams = new URLSearchParams({ plan, shop });
-    const host = requestUrl.searchParams.get("host");
+    const host = (formData.get("host") as string | null) || requestUrl.searchParams.get("host");
     if (host) {
       callbackParams.set("host", host);
     }
@@ -191,61 +195,42 @@ function PlanCard({
 }
 
 export default function BillingPage() {
-  const { currentPlan, plans, subscription } = useLoaderData<typeof loader>();
+  const { currentPlan, plans, subscription, host } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const subscribeFetcher = useFetcher<typeof action>();
-  const cancelFetcher = useFetcher<typeof action>();
   const [subscribingPlan, setSubscribingPlan] = useState<PlanName | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
 
-  const isSubscribing = subscribeFetcher.state !== "idle";
-  const isCancelling = cancelFetcher.state !== "idle";
   const success = searchParams.get("success") === "true";
   const cancelled = searchParams.get("cancelled") === "true";
   const errorParam = searchParams.get("error") === "true";
-  const subscribeError =
-    subscribeFetcher.data && "error" in subscribeFetcher.data
-      ? subscribeFetcher.data.error
-      : null;
-
-  useEffect(() => {
-    if (subscribeFetcher.state === "idle") {
-      setSubscribingPlan(null);
-    }
-  }, [subscribeFetcher.state]);
-
-  useEffect(() => {
-    if (
-      subscribeFetcher.data &&
-      "confirmationUrl" in subscribeFetcher.data &&
-      subscribeFetcher.data.confirmationUrl
-    ) {
-      window.open(subscribeFetcher.data.confirmationUrl, "_top");
-    }
-  }, [subscribeFetcher.data]);
-
-  useEffect(() => {
-    if (
-      cancelFetcher.data &&
-      "cancelled" in cancelFetcher.data &&
-      cancelFetcher.data.cancelled
-    ) {
-      navigate("/app/billing?cancelled=true");
-    }
-  }, [cancelFetcher.data, navigate]);
 
   const handleSubscribe = (plan: PlanName) => {
     setSubscribingPlan(plan);
-    const formData = new FormData();
-    formData.set("intent", "subscribe");
-    formData.set("plan", plan);
-    subscribeFetcher.submit(formData, { method: "post" });
+    const params = new URLSearchParams({ plan });
+    if (host) {
+      params.set("host", host);
+    }
+    window.open(`/app/billing/start?${params.toString()}`, "_top");
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    setIsCancelling(true);
     const formData = new FormData();
     formData.set("intent", "cancel");
-    cancelFetcher.submit(formData, { method: "post" });
+
+    const response = await fetch("/app/billing", {
+      method: "POST",
+      body: formData,
+    });
+
+    setIsCancelling(false);
+
+    if (response.ok) {
+      navigate("/app/billing?cancelled=true");
+    } else {
+      navigate("/app/billing?error=true");
+    }
   };
 
   return (
@@ -268,11 +253,10 @@ export default function BillingPage() {
             </Banner>
           </Layout.Section>
         )}
-        {(errorParam || subscribeError) && (
+        {errorParam && (
           <Layout.Section>
             <Banner tone="critical" title="Something went wrong">
-              {subscribeError ||
-                "There was an error processing your subscription. Please try again."}
+              There was an error processing your subscription. Please try again.
             </Banner>
           </Layout.Section>
         )}
@@ -302,7 +286,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={subscribingPlan === PLAN_STANDARD && isSubscribing}
+              isLoading={subscribingPlan === PLAN_STANDARD}
             />
             <PlanCard
               planKey={PLAN_PREMIUM}
@@ -310,7 +294,7 @@ export default function BillingPage() {
               currentPlan={currentPlan as PlanName}
               onSubscribe={handleSubscribe}
               onCancel={handleCancel}
-              isLoading={subscribingPlan === PLAN_PREMIUM && isSubscribing}
+              isLoading={subscribingPlan === PLAN_PREMIUM}
             />
           </InlineGrid>
         </Layout.Section>

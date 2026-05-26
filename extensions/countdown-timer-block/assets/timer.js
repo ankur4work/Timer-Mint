@@ -350,8 +350,9 @@
 
   async function ensureTimerElements(wrapper, container) {
     let timerEls = container.querySelectorAll('[data-timer-id]');
+    const hasVisibleMarkup = Array.from(timerEls).some(timerEl => timerEl.dataset.timerType);
 
-    if (timerEls.length > 0) {
+    if (hasVisibleMarkup) {
       return timerEls;
     }
 

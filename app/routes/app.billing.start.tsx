@@ -17,7 +17,12 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const appUrl = process.env.SHOPIFY_APP_URL || "";
   const isTest = process.env.SHOPIFY_BILLING_TEST === "true";
-  const returnUrl = `${appUrl}/api/billing/callback?plan=${plan}&shop=${session.shop}`;
+  const callbackParams = new URLSearchParams({ plan, shop: session.shop });
+  const host = url.searchParams.get("host");
+  if (host) {
+    callbackParams.set("host", host);
+  }
+  const returnUrl = `${appUrl}/api/billing/callback?${callbackParams.toString()}`;
 
   const result = await createSubscription(admin, plan, returnUrl, isTest);
 
