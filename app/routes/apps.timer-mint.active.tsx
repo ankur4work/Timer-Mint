@@ -1,5 +1,6 @@
 import { json, type LoaderFunctionArgs } from "@remix-run/node";
 import prisma from "~/db.server";
+import { authenticate } from "~/shopify.server";
 
 /**
  * App Proxy endpoint for fetching active timers
@@ -11,10 +12,9 @@ import prisma from "~/db.server";
  * - X-Shopify-Logged-In-Customer-Id: customer ID if logged in
  */
 export async function loader({ request }: LoaderFunctionArgs) {
-  // Get shop from Shopify proxy headers
-  const shop = request.headers.get("X-Shopify-Shop-Domain");
+  const { session } = await authenticate.public.appProxy(request);
+  const shop = session?.shop;
 
-  // Validate shop header
   if (!shop) {
     return json(
       { error: "Unauthorized", timers: [] },
@@ -192,7 +192,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
           ...getCorsHeaders(),
           // Cache for 60 seconds for performance
           "Cache-Control": "public, max-age=60, s-maxage=60",
-          "Vary": "X-Shopify-Shop-Domain",
         },
       }
     );
@@ -255,7 +254,7 @@ function getCorsHeaders(): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, X-Shopify-Shop-Domain",
+    "Access-Control-Allow-Headers": "Content-Type",
     "Content-Type": "application/json",
   };
 }
