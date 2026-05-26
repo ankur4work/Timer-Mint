@@ -353,7 +353,7 @@ export function getDefaultTimerFormData(): TimerFormData {
   return {
     name: "",
     type: "COUNTDOWN",
-    status: "INACTIVE",
+    status: "ACTIVE",
     startDate: "",
     endDate: "",
     timezone: "UTC",
